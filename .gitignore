@@ -1,0 +1,31 @@
+# --- Planning material that stays out of the public repo ---
+Portfolio Project Blueprint.pdf
+*.pdf
+
+# --- Benchmark data (downloaded by hand, see README "Get the data") ---
+# BIRD Mini-Dev is ~800 MB of SQLite files and is CC BY-SA licensed.
+# We never commit it; everyone downloads their own copy.
+data/
+
+# --- Raw benchmark outputs ---
+# Big per-run files stay local. Summaries we want to publish get copied into
+# results/ by hand and committed on purpose.
+bench/runs/
+
+# --- Python ---
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
