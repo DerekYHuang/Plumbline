@@ -1,0 +1,5 @@
+# Store text files with LF line endings in the repo no matter which OS edits
+# them. Without this, Windows checkouts flip files to CRLF and diffs get noisy.
+* text=auto eol=lf
+*.sqlite binary
+*.png binary
