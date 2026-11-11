@@ -1,0 +1,33 @@
+# Continuous integration: on every push and pull request, lint and test.
+#
+# The blueprint also wants a 20-question smoke benchmark here. That needs the
+# BIRD databases and a model, which we can't redistribute or run on a free CI
+# runner, so it's deferred: M1/M2 will add a tiny committed fixture database
+# that the rule tests run against instead.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Oldest supported (pyproject says >=3.11) and a current one.
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check .
+      - name: Test
+        run: pytest -q
