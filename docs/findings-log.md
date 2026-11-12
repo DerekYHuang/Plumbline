@@ -17,3 +17,18 @@ Keep each entry short: what, evidence (question id, query) and what it means.
 - **Gold queries verified.** `python -m bench.verify_gold`: 500/500 gold queries run
   and return rows on the local copy (201.5 s total, median 11 ms). The slowest took
   28.0 s, close to the original 30 s timeout, so the timeout was raised to 60 s.
+- **GPU backend.** Ollama's CUDA backend crashed on the GTX 1060 with driver 555.85
+  (CUDA 12.5): "PTX was compiled with an unsupported toolchain". The Vulkan backend
+  (`OLLAMA_VULKAN=1`) works: 28/29 layers on the GPU, about 21 tokens/s, about 29 s per
+  question, so a full 500-question run takes about 4 hours.
+- **Smoke run (q0 to q19, all `california_schools`), qwen2.5-coder:7b: 0/20 correct**
+  (11 `wrong_result`, 9 `exec_error`, none truncated). Reading the answers confirmed
+  the pipeline is fine and these are genuine model errors. Still not representative:
+  one database, mostly challenging questions. Examples:
+  - **q1: a wrong filter value, Plumbline's headline case.** The model wrote
+    `FundingType = 'Locally Funded'`, but the data holds `'Locally funded'`. The query
+    runs and silently returns the wrong rows; a value check would catch it.
+  - **q3:** the unquoted column `District Type` gives a syntax error. The database
+    catches this one.
+  - **q0:** integer division `NumGE1500 / NumTstTakr` turns every rate into 0 or 1.
+    This is a type issue, not schema or value: a candidate for a later rule.
