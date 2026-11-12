@@ -51,7 +51,7 @@ Design choices worth being able to defend in an interview:
 | `correct` | Result set equals gold (order and duplicates ignored) |
 | `wrong_result` | Ran fine and returned a different answer: **Plumbline's target** |
 | `exec_error` | The database rejected it (unknown column, syntax error, ...) |
-| `timeout` | Took longer than 30 s |
+| `timeout` | Took longer than 60 s |
 | `no_sql` | No SQL found in the model's answer |
 | `gold_error` | The gold query failed: a data problem, excluded from accuracy |
 

@@ -53,4 +53,6 @@ DEFAULT_OPTIONS = {
 
 # Seconds before a single SQL query is aborted (both gold and predicted).
 # Some model-written queries are accidental cross joins that never finish.
-SQL_TIMEOUT_S = 30.0
+# 60 s, not 30: on 2026-11-11 the slowest GOLD query took 28 s on a home PC,
+# too close to 30 s -- a busy machine could have timed out a correct answer.
+SQL_TIMEOUT_S = 60.0

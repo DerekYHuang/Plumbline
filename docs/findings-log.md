@@ -14,3 +14,6 @@ Keep each entry short: what, evidence (question id, query) and what it means.
 - **Competitor to check.** The BIRD website links *schemagate* (github.com/ashishsinha1602/schemagate),
   which has its own BIRD Mini-Dev benchmark. It isn't in the blueprint's Section B; add
   it to the week-1 kill-criterion comparison.
+- **Gold queries verified.** `python -m bench.verify_gold`: 500/500 gold queries run
+  and return rows on the local copy (201.5 s total, median 11 ms). The slowest took
+  28.0 s, close to the original 30 s timeout, so the timeout was raised to 60 s.
