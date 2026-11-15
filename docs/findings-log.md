@@ -117,3 +117,22 @@ against it, instead of writing a rival rule.
 - **r2/r3 seed runs skipped (Derek, 2026-11-15).** At temperature 0 the seed is ignored,
   so they would nearly duplicate r1. The baseline is reported as **9.2%, 95% Wilson CI 7.0%
   to 12.1%** (46/500). M0 is closed.
+
+- **M1 profiler.** All 11 databases (798 columns) profile in 6.2 min. The 10-column
+  hand-check matched 10/10. 456 columns got a complete value list. No BIRD column mixes
+  storage types.
+
+- **M2 sanity run (preliminary; M3 scores formally).** All rules over the 500 gold and
+  500 qwen7b-r1 queries:
+  - silent wrong answers: **71/308 (23%)** fail;
+  - gold: **9/500 (1.8%)** false alarms, all from grainguard fan-out;
+  - Plumbline's own schema + value rules: **33/308 silent errors, 0/500 gold false
+    alarms**, and 30 of the 33 are missed by fan-out;
+  - crashing answers: 113/144 flagged before running;
+  - median latency 6.8 ms.
+  - **Three bugs found only by real data:** a TokenError crash on an unterminated string;
+    one alias for two tables (q236, q212: `disp d ... district d`, which SQLite runs
+    silently, now rule `SCHEMA_ALIAS`); correlated subquery columns reported twice.
+  - **q496 tuning, flagged honestly:** the gold query's `IN` list names 2 metals absent
+    from the data. A missing `IN` item is now a warning when another item exists. This
+    was decided after seeing q496; a mutation test set in M3 will check for overfitting.

@@ -45,8 +45,8 @@ and returns a repair hint the AI can act on. For join double-counting it relies 
 existing tool [grainguard](https://github.com/rohitchaurasia195-web/GRAINGUARD) rather than
 reinventing it.
 
-> Status: M0 (baseline, go/pivot check) and M1 (data profiler) are done; M2 (the checks)
-> is next.
+> Status: M0 (baseline), M1 (profiler) and M2 (checks) are done; M3 (formal scoring) is
+> next.
 > Every number in this README is measured, with the benchmark and model named.
 > Milestone reviews: [docs/milestones/](docs/milestones/).
 
@@ -89,6 +89,38 @@ data/bird_mini_dev/
 ```
 
 Put the data somewhere else by setting `PLUMBLINE_BIRD_DIR`.
+
+## Check a query (M2)
+
+```bash
+plumbline check california_schools.json \
+  "SELECT COUNT(*) FROM schools WHERE FundingType = 'Locally Funded'"
+```
+
+```
+FAIL (1 errors, 0 warnings)
+
+  [error] VALUE_CASE: 'Locally Funded' is not a value of schools.FundingType; the data
+          has 'Locally funded' (differs only in capitalisation or spaces).
+    hint: Use 'Locally funded'.
+```
+
+Exit code 0 = pass, 1 = fail, 2 = bad input; `--json` for the full structured result.
+From Python: `plumbline.check_sql(sql, Catalog.load(path))`.
+
+| Rule | Catches |
+|---|---|
+| `VALUE_CASE` | right value, wrong capitalisation or spaces |
+| `VALUE_MISSING` | a value the column never holds (with "did you mean") |
+| `VALUE_FORMAT` | a code or date in the wrong format (e.g. a missing leading zero) |
+| `LIKE_NO_MATCH` | a `LIKE` pattern that matches no value |
+| `SCHEMA_TABLE` / `SCHEMA_COLUMN` | invented tables and columns |
+| `SCHEMA_ALIAS` | one alias for two tables, which SQLite silently accepts |
+| `FANOUT` / `CHASM` | totals inflated by a join (via [grainguard](https://github.com/rohitchaurasia195-web/GRAINGUARD), optional extra `[fanout]`) |
+
+Preliminary result on the M0 queries: 23% of the silent wrong answers flagged, at 1.8%
+false alarms on correct queries. Plumbline's own rules alone catch 33 silent errors with 0
+false alarms. See [docs/milestones/m2-review.md](docs/milestones/m2-review.md).
 
 ## Profile a database (M1)
 

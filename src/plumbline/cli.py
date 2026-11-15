@@ -1,7 +1,10 @@
 """Command-line entry point: the `plumbline` command.
 
     plumbline profile <db.sqlite> [-o catalog.json]    (M1: build the data catalog)
-    plumbline check <db> <query>                        (M2: coming next)
+    plumbline check <db.sqlite | catalog.json> "<SQL>" [--json]   (M2: run the checks)
+
+`check` exit codes: 0 = passed, 1 = an error-level finding, 2 = bad input
+(missing file, unparseable SQL). So it drops straight into CI or a shell script.
 
 We use argparse (standard library) rather than click/typer to keep the
 dependency list short. Each subcommand is one `sub.add_parser(...)` plus a
@@ -11,9 +14,14 @@ small function that does the work and returns an exit code.
 from __future__ import annotations
 
 import argparse
+import json
+import sys
 from pathlib import Path
 
 from plumbline import __version__
+from plumbline.catalog import Catalog
+from plumbline.check import check_sql
+from plumbline.findings import CheckResult
 from plumbline.profiler import MAX_VALUES, profile_database
 
 
@@ -44,6 +52,16 @@ def build_parser() -> argparse.ArgumentParser:
         f"(default {MAX_VALUES})",
     )
     p.set_defaults(func=cmd_profile)
+
+    c = sub.add_parser("check", help="check one SQL query against a database's catalog")
+    c.add_argument(
+        "target",
+        type=Path,
+        help="a catalog .json, or a .sqlite file (its catalog is built and cached on first use)",
+    )
+    c.add_argument("sql", help='the query, "-" to read it from stdin, or @file.sql')
+    c.add_argument("--json", action="store_true", help="print the full result as JSON")
+    c.set_defaults(func=cmd_check)
     return parser
 
 
@@ -64,6 +82,58 @@ def cmd_profile(args: argparse.Namespace) -> int:
         f"  catalog -> {out}"
     )
     return 0
+
+
+def _load_catalog(target: Path) -> Catalog:
+    """A .json is used as is; a .sqlite gets a cached catalog next to it."""
+    if target.suffix.lower() == ".json":
+        return Catalog.load(target)
+    cached = target.with_name(f"{target.stem}.catalog.json")
+    if cached.exists():
+        cat = Catalog.load(cached)
+        if not cat.is_stale():
+            return cat
+    print(f"(profiling {target.name} once; catalog cached at {cached})", file=sys.stderr)
+    cat = profile_database(target)
+    cat.save(cached)
+    return cat
+
+
+def _read_sql(arg: str) -> str:
+    if arg == "-":
+        return sys.stdin.read()
+    if arg.startswith("@"):
+        return Path(arg[1:]).read_text(encoding="utf-8")
+    return arg
+
+
+def _print_result(r: CheckResult) -> None:
+    if r.parse_error:
+        print(f"PARSE ERROR: {r.parse_error}")
+        return
+    print("PASS" if r.passed else "FAIL", f"({len(r.errors)} errors, {len(r.warnings)} warnings)")
+    for f in r.findings:
+        print(f"\n  [{f.severity}] {f.rule}: {f.message}")
+        if f.snippet:
+            print(f"    in:   {f.snippet}")
+        if f.hint:
+            print(f"    hint: {f.hint}")
+    for n in r.notes:
+        print(f"\n  note: {n}")
+
+
+def cmd_check(args: argparse.Namespace) -> int:
+    if not args.target.exists():
+        print(f"error: no such file: {args.target}")
+        return 2
+    result = check_sql(_read_sql(args.sql), _load_catalog(args.target))
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=1, ensure_ascii=False, default=str))
+    else:
+        _print_result(result)
+    if result.parse_error:
+        return 2
+    return 0 if result.passed else 1
 
 
 def main(argv: list[str] | None = None) -> int:
