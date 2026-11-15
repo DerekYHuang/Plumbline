@@ -1,15 +1,53 @@
 # Plumbline
 
-**Catches AI-written SQL that runs fine but returns the wrong answer, before it runs.**
+## The problem
 
-> Status: early development (milestone M0, baseline). No results yet. Every number
-> in this README will be a measured one, with the benchmark and model named.
+**AI models now write SQL for people who can't check it, and a large share of that SQL
+runs without error but returns the wrong answer.**
 
-A database rejects broken SQL but happily runs wrong SQL. An agent filters on
-`status = 'Finished'` when the column holds `'Completed'`, gets zero rows, and reports
-zero. Nothing errors, so nobody notices. Plumbline profiles the real data, parses each
-agent-written query, and flags invented columns, filter values that don't exist, and
-joins that double-count, returning a repair hint the agent can act on.
+A database only rejects SQL that is *broken*: a misspelled column, bad syntax. It
+happily runs SQL that is *wrong*. Ask an AI "how many locally funded schools...?" and it
+writes `WHERE FundingType = 'Locally Funded'`, but the data says `'Locally funded'` (small
+f). The query runs, matches nothing or the wrong rows, and the user gets a confident,
+wrong number. No error appears anywhere, so nobody finds out.
+
+How big the problem is, measured on this project's own test (BIRD Mini-Dev, 500
+questions, local model `qwen2.5-coder:7b`):
+
+| What happened to the 500 AI-written queries | Count |
+|---|---|
+| Right answer | 46 (9%) |
+| Database rejected it (the error is visible) | 144 (29%) |
+| **Ran fine, wrong answer (the error is silent)** | **308 (62%)** |
+
+The silent group is the dangerous one. Existing checkers mostly look for one cause,
+joins that double-count rows, and the best of them flags 17% of these queries. **None
+checks whether the values a query filters on actually exist in the data.** In this test,
+35 of the silent errors filter on a value the column never contains, and 15 of those are
+caught by no existing tool. Details: [docs/findings-log.md](docs/findings-log.md).
+
+**Who it hurts:** analysts, operations and business teams using "ask your data" tools
+and AI agents that query databases directly. Nobody in that loop reads the SQL.
+
+## What Plumbline does
+
+**Checks AI-written SQL against the real data before it runs, and says what to fix.**
+
+Plumbline profiles each database once: which values each column actually holds, their
+spelling and case, what IDs look like. Then it checks every AI-written query against that
+profile and flags:
+
+- filter values that don't exist (`'Locally Funded'` vs `'Locally funded'`),
+- invented IDs and codes (a school code missing its leading zero),
+- invented columns and tables,
+
+and returns a repair hint the AI can act on. For join double-counting it relies on the
+existing tool [grainguard](https://github.com/rohitchaurasia195-web/GRAINGUARD) rather than
+reinventing it.
+
+> Status: milestone M0 (baseline and go/pivot check) is done; M1 (data profiler) is next.
+> Every number in this README is measured, with the benchmark and model named.
+> Milestone reviews: [docs/milestones/](docs/milestones/).
 
 ## Setup
 

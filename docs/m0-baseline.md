@@ -66,7 +66,9 @@ python -m bench.score qwen7b-r1
 ```
 
 The blueprint asks for **three runs** so we can report a spread, not a single number.
-At temperature 0, vary the seed (`--seed 43`, `--seed 44`) and use run ids `-r2` and `-r3`.
+At temperature 0, though, the seed is ignored, so extra seeds give near-copies of r1. We
+report a 95% confidence interval instead (7.0% to 12.1% for r1). See
+[milestones/m0-review.md](milestones/m0-review.md), problem 7.
 
 Outputs land in `bench/runs/<run_id>/` (gitignored). When a run is final, copy its
 `summary.json` to `results/YYYY-MM-DD_<run_id>_summary.json` and commit it.
