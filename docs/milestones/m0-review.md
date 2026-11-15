@@ -192,6 +192,7 @@ code). The `tests/` folder holds 30 unit tests for the bench code.
 
 ## Open decisions for Derek
 
-1. Skip r2 and r3 and report the 7.0% to 12.1% interval instead? (Recommended.)
+1. ~~Skip r2 and r3 and report the 7.0% to 12.1% interval instead?~~ **Decided
+   2026-11-15: skipped.** The baseline is reported as 9.2% (95% CI 7.0% to 12.1%).
 2. Run the original 2024 Mini-Dev once for a leaderboard-comparable number? (Optional,
    about 4 hours of GPU time.)

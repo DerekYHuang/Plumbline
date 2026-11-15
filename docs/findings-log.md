@@ -112,5 +112,8 @@ on almost every table (thrombosis_prediction 2/3, superhero 8/10).
 **Decision (confirmed by Derek, 2026-11-15): GO, repositioned.** Plumbline's core is
 value and schema grounding (wrong filter values, invented IDs, case mismatches), which no
 existing tool covers. For fan-out, reuse grainguard (MIT) as a dependency or benchmark
-against it, instead of writing a rival rule. M0 is closed except the two extra seed runs
-(r2, r3), which Derek runs on his own time.
+against it, instead of writing a rival rule.
+
+- **r2/r3 seed runs skipped (Derek, 2026-11-15).** At temperature 0 the seed is ignored,
+  so they would nearly duplicate r1. The baseline is reported as **9.2%, 95% Wilson CI 7.0%
+  to 12.1%** (46/500). M0 is closed.
