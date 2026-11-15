@@ -17,16 +17,28 @@ readme = "README.md"
 license = "MIT"
 authors = [{ name = "Derek Huang" }]
 requires-python = ">=3.11"
-# Runtime deps stay tiny on purpose. M0 only needs an HTTP client to talk to
-# Ollama. sqlglot + duckdb arrive in M1/M2 when the profiler and rules land.
+# Runtime deps stay tiny on purpose.
+#   requests  talks to Ollama (benchmark)
+#   sqlglot   parses SQL into a tree and resolves each column to its table (M2 checks).
+#             Pinned to one major version: sqlglot changes its API between majors.
+# The profiler (M1) uses only the standard library's sqlite3.
 dependencies = [
     "requests>=2.31",
+    "sqlglot>=30.31,<31",
 ]
 
 [project.optional-dependencies]
+# Join double-counting ("fan-out") is checked by grainguard (MIT), not re-implemented
+# here: see docs/findings-log.md, go/pivot decision. Pinned exactly: it is a young
+# project and its finding codes are part of our output.
+fanout = [
+    "grainguard==0.1.0",
+]
 dev = [
     "pytest>=8",
     "ruff>=0.6",
+    "pre-commit>=3.7",
+    "grainguard==0.1.0",
 ]
 
 [project.scripts]

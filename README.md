@@ -58,6 +58,7 @@ Requires Python 3.11+.
 python -m venv .venv
 .venv\Scripts\activate          # Windows  (macOS/Linux: source .venv/bin/activate)
 pip install -e ".[dev]"
+pre-commit install              # lint runs before every commit, same as CI
 pytest -q
 ```
 

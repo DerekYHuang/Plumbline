@@ -1,0 +1,11 @@
+# Runs before every `git commit` (after a one-time `pre-commit install`).
+# Same checks as CI, so a commit that would break CI is stopped on your machine instead.
+# Added in M1 after the M0 comparison script broke CI's lint step unnoticed.
+#
+# Ruff runs from its own pinned environment, so the hook works whether or not the
+# project venv is activated in the terminal you commit from.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.4  # keep in step with the ruff version in the venv
+    hooks:
+      - id: ruff-check  # lint (same as CI's `ruff check .`)
