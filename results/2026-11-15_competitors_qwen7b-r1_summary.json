@@ -1,0 +1,174 @@
+{
+  "run_id": "qwen7b-r1",
+  "key_coverage": {
+    "california_schools": {
+      "tables": 3,
+      "with_key": 3,
+      "fks": 2
+    },
+    "card_games": {
+      "tables": 6,
+      "with_key": 6,
+      "fks": 4
+    },
+    "codebase_community": {
+      "tables": 8,
+      "with_key": 8,
+      "fks": 13
+    },
+    "debit_card_specializing": {
+      "tables": 5,
+      "with_key": 5,
+      "fks": 2
+    },
+    "european_football_2": {
+      "tables": 7,
+      "with_key": 7,
+      "fks": 31
+    },
+    "financial": {
+      "tables": 8,
+      "with_key": 8,
+      "fks": 8
+    },
+    "formula_1": {
+      "tables": 13,
+      "with_key": 13,
+      "fks": 19
+    },
+    "student_club": {
+      "tables": 8,
+      "with_key": 8,
+      "fks": 8
+    },
+    "superhero": {
+      "tables": 10,
+      "with_key": 8,
+      "fks": 11
+    },
+    "thrombosis_prediction": {
+      "tables": 3,
+      "with_key": 2,
+      "fks": 2
+    },
+    "toxicology": {
+      "tables": 4,
+      "with_key": 4,
+      "fks": 5
+    }
+  },
+  "tools": {
+    "sqlsure": {
+      "pred_wrong_result": {
+        "n": 308,
+        "flagged_any": 98,
+        "flagged_strong": 53,
+        "crashed": 0
+      },
+      "pred_correct": {
+        "n": 46,
+        "flagged_any": 10,
+        "flagged_strong": 7,
+        "crashed": 0
+      },
+      "gold": {
+        "n": 500,
+        "flagged_any": 58,
+        "flagged_strong": 41,
+        "crashed": 0
+      },
+      "rules_on_wrong_result": {
+        "UNDECLARED_JOIN": 89,
+        "FANOUT": 65,
+        "JOIN_KEY": 53,
+        "CHASM": 14,
+        "WEIGHTED_AVG": 9
+      }
+    },
+    "grainguard": {
+      "pred_wrong_result": {
+        "n": 308,
+        "flagged_any": 44,
+        "flagged_strong": 44,
+        "crashed": 0
+      },
+      "pred_correct": {
+        "n": 46,
+        "flagged_any": 2,
+        "flagged_strong": 2,
+        "crashed": 0
+      },
+      "gold": {
+        "n": 500,
+        "flagged_any": 10,
+        "flagged_strong": 10,
+        "crashed": 0
+      },
+      "rules_on_wrong_result": {
+        "FANOUT_AGG": 31,
+        "CHASM_TRAP": 23,
+        "UNKNOWN_GRAIN": 20
+      }
+    },
+    "graincheck": {
+      "pred_wrong_result": {
+        "n": 308,
+        "flagged_any": 94,
+        "flagged_strong": 48,
+        "crashed": 0
+      },
+      "pred_correct": {
+        "n": 46,
+        "flagged_any": 10,
+        "flagged_strong": 1,
+        "crashed": 0
+      },
+      "gold": {
+        "n": 500,
+        "flagged_any": 92,
+        "flagged_strong": 17,
+        "crashed": 0
+      },
+      "rules_on_wrong_result": {
+        "JOIN_FANOUT": 68,
+        "UNGUARDED_DIVISION": 41,
+        "COUNT_STAR_ACROSS_JOIN": 12,
+        "DISTINCT_MASKS_FANOUT": 4,
+        "OUTER_JOIN_FILTER_IN_WHERE": 3,
+        "AVG_OF_RATIOS": 2,
+        "NON_ADDITIVE_SUM": 2,
+        "DUPLICATE_ROWS_FROM_JOIN": 1
+      }
+    }
+  },
+  "value_check": {
+    "pred_wrong_result": {
+      "n": 308,
+      "queries_with_missing_value": 35,
+      "by_kind": {
+        "case_or_space_mismatch": 33,
+        "absent": 30
+      }
+    },
+    "pred_correct": {
+      "n": 46,
+      "queries_with_missing_value": 1,
+      "by_kind": {
+        "absent": 2
+      }
+    },
+    "gold": {
+      "n": 500,
+      "queries_with_missing_value": 1,
+      "by_kind": {
+        "absent": 2
+      }
+    }
+  },
+  "any_tool_flags_wrong_result": 139,
+  "value_vs_tools_on_wrong_result": {
+    "value_flag_only": 15,
+    "tool_flag_only": 119,
+    "both": 20
+  }
+}

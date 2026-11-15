@@ -29,3 +29,7 @@ htmlcov/
 .idea/
 .DS_Store
 Thumbs.db
+
+# competitor comparison sandbox (isolated venv, downloaded wheels)
+.compare/
+compare/results/

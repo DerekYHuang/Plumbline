@@ -59,3 +59,57 @@ Keep each entry short: what, evidence (question id, query) and what it means.
   question says to count cards by name, which a rule can't catch.
 - **Per database:** thrombosis_prediction 1/86 and california_schools 1/49 are worst,
   card_games 10/69 best.
+
+### Go/pivot check: existing checkers vs the qwen7b-r1 errors
+
+Harness: `compare/run_competitors.py`. The tools live in an isolated venv under `.compare/`
+and their wheels were checked for network and subprocess calls before install. Every tool
+got the same facts, read from each SQLite file: primary keys and UNIQUE indexes as grain,
+foreign keys as join cardinality. Nothing was tuned per query. All 11 databases have keys
+on almost every table (thrombosis_prediction 2/3, superhero 8/10).
+
+- **What's out there.**
+  - **sqlsure 0.1.1** (Apache-2.0, Jul 2026): fan-out, chasm, additivity, join-key and
+    PII rules, checked against a declared semantic model.
+  - **grainguard 0.1.0** (MIT, Oct 2026): infers grain from keys and SQL, and flags
+    fan-out and chasm aggregates.
+  - **graincheck 0.1.1** (Sep 2026): fan-out, outer-join-in-WHERE, average-of-ratios,
+    unguarded-division and similar rules, aimed at dbt projects.
+  - **sqlsift:** not on PyPI and not findable; dropped.
+  - **schemagate:** selects the schema *before* generation and never checks finished SQL,
+    so it isn't a competitor for this check.
+  - graincheck's README also names dblect, dbt-assay and Altimate. The fan-out niche is
+    crowded.
+
+- **Results.** "Rejected" counts error-level findings only (graincheck: high impact); warnings
+  are excluded. Columns: rejected wrong answers out of 308 silent ones, rejected gold
+  queries out of 500 (false alarms), and rejected correct answers out of 46.
+
+  | Tool | Wrong answers rejected (/308) | Gold rejected (/500) | Correct preds rejected (/46) |
+  |---|---|---|---|
+  | sqlsure | 53 (17%) | 41 (8.2%) | 7 |
+  | grainguard | 44 (14%) | 10 (2.0%) | 2 |
+  | graincheck | 48 (16%) | 17 (3.4%) | 1 |
+  | **value check (Plumbline prototype)** | **35 (11%)** | **1 (0.2%)** | **1** |
+
+- **No tool catches most of the silent errors.** The best rejects 17% of them, and
+  sqlsure does it at an 8% false-alarm rate on gold. Even all three tools together, counting
+  warnings, flag 139/308, much of it noise.
+- **Fan-out is solved well enough already.** All three flag q403 and q106. grainguard has
+  the best balance: 14% of wrong answers rejected at 2% false alarms. Building a fourth
+  fan-out checker adds nothing.
+- **Wrong filter values are uncovered.** No tool flags q1 (`'Locally Funded'` vs
+  `'Locally funded'`). The value-check prototype (string literal in `=`/`IN` that never
+  occurs in that column) flags 35/308 wrong answers. Of those, 33 literals are case or
+  whitespace mismatches (`watermark = 'Boros'` vs `'boros'`) and 30 are absent values,
+  e.g. CDS codes that lost their leading zero. **15 of the 35 are flagged by no other
+  tool.** It raised 1 false alarm on 500 gold queries: q496 filters on elements
+  `'mg'`/`'li'` that don't occur in the data, and the gold answer is still right.
+- **Caveats.** "Rejected" means a tool flagged the query, not that it named the actual bug.
+  Fan-out flags were checked by hand only on q403/q106/q58. The value check is a 60-line
+  prototype that only understands `=` and `IN` on string literals.
+
+**Recommended decision: GO, repositioned.** Plumbline's core is value and schema
+grounding (wrong filter values, invented IDs, case mismatches), which no existing tool
+covers. For fan-out, reuse grainguard (MIT) as a dependency or benchmark against it,
+instead of writing a rival rule. Pending Derek's confirmation.
