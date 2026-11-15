@@ -21,6 +21,7 @@ Run it with the isolated comparison venv (the tools are not project dependencies
 
 Output: compare/results/<run_id>/per_query.jsonl and summary.json
 """
+
 from __future__ import annotations
 
 import collections
@@ -53,10 +54,14 @@ class DbFacts:
         self.path = path
         self.con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
         cur = self.con.cursor()
-        self.tables = [r[0] for r in cur.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")]
-        self.columns: dict[str, list[tuple[str, str]]] = {}   # table -> [(col, declared type)]
-        self.keys: dict[str, list[list[str]]] = {}           # table -> list of unique key sets
+        self.tables = [
+            r[0]
+            for r in cur.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+            )
+        ]
+        self.columns: dict[str, list[tuple[str, str]]] = {}  # table -> [(col, declared type)]
+        self.keys: dict[str, list[list[str]]] = {}  # table -> list of unique key sets
         self.fks: list[tuple[str, str, list[tuple[str, str]]]] = []  # (child, parent, [(c, p)])
         for t in self.tables:
             info = list(cur.execute(f'PRAGMA table_info("{t}")'))
@@ -85,23 +90,33 @@ class DbFacts:
     # ---- per-tool encodings ------------------------------------------------
     def sqlsure_model(self):
         from sqlsure.model import SemanticModel
+
         numeric = ("INT", "REAL", "FLOA", "DOUB", "NUM", "DEC")
         tables, joins = {}, []
         for t in self.tables:
             key_cols = {c for k in self.keys[t] for c in k}
             fk_cols = {frm for child, _, pairs in self.fks if child == t for frm, _ in pairs}
-            measures = {c: "additive" for c, typ in self.columns[t]
-                        if any(n in typ for n in numeric) and c not in key_cols | fk_cols}
+            measures = {
+                c: "additive"
+                for c, typ in self.columns[t]
+                if any(n in typ for n in numeric) and c not in key_cols | fk_cols
+            }
             tables[t] = {"grain": self.keys[t][0] if self.keys[t] else [], "measures": measures}
         for child, parent, pairs in self.fks:
             child_unique = self.is_unique(child, [c for c, _ in pairs])
-            joins.append({"left": child, "right": parent,
-                          "cardinality": "one_to_one" if child_unique else "many_to_one",
-                          "keys": [[c, p if p else c] for c, p in pairs]})
+            joins.append(
+                {
+                    "left": child,
+                    "right": parent,
+                    "cardinality": "one_to_one" if child_unique else "many_to_one",
+                    "keys": [[c, p if p else c] for c, p in pairs],
+                }
+            )
         return SemanticModel.from_dict({"tables": tables, "joins": joins})
 
     def grainguard_facts(self):
         from grainguard.facts import FactStore
+
         fs = FactStore()
         for t in self.tables:
             fs.add_columns(t, [c for c, _ in self.columns[t]])
@@ -110,26 +125,35 @@ class DbFacts:
         return fs
 
     def graincheck_uniques(self) -> dict:
-        return {t.lower(): [frozenset(c.lower() for c in k) for k in ks]
-                for t, ks in self.keys.items() if ks}
+        return {
+            t.lower(): [frozenset(c.lower() for c in k) for k in ks]
+            for t, ks in self.keys.items()
+            if ks
+        }
 
 
 # --------------------------------------------------------------------------- the three tools
 def run_sqlsure(sql: str, facts: DbFacts) -> list[dict]:
     from sqlsure import check
-    return [{"rule": v.rule, "severity": v.severity}
-            for v in check(sql, facts._sqlsure, dialect=DIALECT)]
+
+    return [
+        {"rule": v.rule, "severity": v.severity}
+        for v in check(sql, facts._sqlsure, dialect=DIALECT)
+    ]
 
 
 def run_grainguard(sql: str, facts: DbFacts) -> list[dict]:
     from grainguard.analyzer import Analyzer
+
     res = Analyzer(facts=facts._grainguard, dialect=DIALECT).analyze_sql(sql)
-    return [{"rule": f.code, "severity": f.severity} for f in res.findings
-            if f.code != "PARSE_ERROR"]
+    return [
+        {"rule": f.code, "severity": f.severity} for f in res.findings if f.code != "PARSE_ERROR"
+    ]
 
 
 def run_graincheck(sql: str, facts: DbFacts) -> list[dict]:
     from graincheck.scanner import scan_sql
+
     findings, _err = scan_sql(sql, "query", dialect=DIALECT, uniques=facts._graincheck)
     out = []
     for f in findings:
@@ -153,7 +177,7 @@ def safe(fn, sql, facts):
         return [], f"{type(e).__name__}: {str(e)[:120]}"
 
 
-# --------------------------------------------------------------------------- value check (Plumbline preview)
+# ---------------------------------------------------------- value check (Plumbline preview)
 def missing_values(sql: str, facts: DbFacts) -> list[dict]:
     """String literals compared with = / IN to a column that never holds that exact value."""
     try:
@@ -170,9 +194,14 @@ def missing_values(sql: str, facts: DbFacts) -> list[dict]:
             t = alias_to_table.get(col.table.lower()) or col.table
             t = lower_tables.get(t.lower())
             return [t] if t else []
-        used = [lower_tables[n.lower()] for n in alias_to_table.values() if n.lower() in lower_tables]
-        return [t for t in dict.fromkeys(used)
-                if any(c.lower() == col.name.lower() for c, _ in facts.columns[t])]
+        used = [
+            lower_tables[n.lower()] for n in alias_to_table.values() if n.lower() in lower_tables
+        ]
+        return [
+            t
+            for t in dict.fromkeys(used)
+            if any(c.lower() == col.name.lower() for c, _ in facts.columns[t])
+        ]
 
     pairs = []
     for node in tree.find_all(exp.EQ, exp.In):
@@ -197,7 +226,7 @@ def missing_values(sql: str, facts: DbFacts) -> list[dict]:
         found = case_only = False
         for t in tabs:
             real = next((c for c, _ in facts.columns[t] if c.lower() == col.name.lower()), None)
-            if real is None:   # alias of a CTE/subquery column: can't resolve, so don't judge
+            if real is None:  # alias of a CTE/subquery column: can't resolve, so don't judge
                 found = True
                 break
             q = f'SELECT 1 FROM "{t}" WHERE "{real}" = ? LIMIT 1'
@@ -208,8 +237,13 @@ def missing_values(sql: str, facts: DbFacts) -> list[dict]:
             if cur.execute(q, (value,)).fetchone():
                 case_only = True
         if not found:
-            out.append({"column": col.sql(), "value": value,
-                        "kind": "case_or_space_mismatch" if case_only else "absent"})
+            out.append(
+                {
+                    "column": col.sql(),
+                    "value": value,
+                    "kind": "case_or_space_mismatch" if case_only else "absent",
+                }
+            )
     return out
 
 
@@ -217,16 +251,32 @@ def missing_values(sql: str, facts: DbFacts) -> list[dict]:
 def main(run_id: str) -> int:
     Q = {q["question_id"]: q for q in map(json.loads, QUESTIONS.open(encoding="utf-8"))}
     run_dir = ROOT / "bench" / "runs" / run_id
-    P = {p["question_id"]: p for p in map(json.loads, (run_dir / "predictions.jsonl").open(encoding="utf-8"))}
-    L = {l["question_id"]: l for l in map(json.loads, (run_dir / "labels.jsonl").open(encoding="utf-8"))}
+    P = {
+        p["question_id"]: p
+        for p in map(json.loads, (run_dir / "predictions.jsonl").open(encoding="utf-8"))
+    }
+    L = {
+        lab["question_id"]: lab
+        for lab in map(json.loads, (run_dir / "labels.jsonl").open(encoding="utf-8"))
+    }
 
     dbs: dict[str, DbFacts] = {}
     for db_id in sorted({q["db_id"] for q in Q.values()}):
         f = DbFacts(find_db(db_id))
-        f._sqlsure, f._grainguard, f._graincheck = f.sqlsure_model(), f.grainguard_facts(), f.graincheck_uniques()
+        f._sqlsure, f._grainguard, f._graincheck = (
+            f.sqlsure_model(),
+            f.grainguard_facts(),
+            f.graincheck_uniques(),
+        )
         dbs[db_id] = f
-    key_cov = {d: {"tables": len(f.tables), "with_key": sum(bool(k) for k in f.keys.values()),
-                   "fks": len(f.fks)} for d, f in dbs.items()}
+    key_cov = {
+        d: {
+            "tables": len(f.tables),
+            "with_key": sum(bool(k) for k in f.keys.values()),
+            "fks": len(f.fks),
+        }
+        for d, f in dbs.items()
+    }
 
     out_dir = ROOT / "compare" / "results" / run_id
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -252,7 +302,9 @@ def main(run_id: str) -> int:
         return any(f["severity"] in STRONG[tool] for f in fs) if strong else bool(fs)
 
     groups = {
-        "pred_wrong_result": [r for r in rows if r["kind"] == "pred" and r["label"] == "wrong_result"],
+        "pred_wrong_result": [
+            r for r in rows if r["kind"] == "pred" and r["label"] == "wrong_result"
+        ],
         "pred_correct": [r for r in rows if r["kind"] == "pred" and r["label"] == "correct"],
         "gold": [r for r in rows if r["kind"] == "gold"],
     }
@@ -261,20 +313,29 @@ def main(run_id: str) -> int:
         t = {}
         for g, rs in groups.items():
             n = len(rs)
-            t[g] = {"n": n,
-                    "flagged_any": sum(flagged(r, tool, False) for r in rs),
-                    "flagged_strong": sum(flagged(r, tool, True) for r in rs),
-                    "crashed": sum(bool(r[tool + "_crash"]) for r in rs)}
-        t["rules_on_wrong_result"] = dict(collections.Counter(
-            f["rule"] for r in groups["pred_wrong_result"] for f in r[tool]).most_common())
+            t[g] = {
+                "n": n,
+                "flagged_any": sum(flagged(r, tool, False) for r in rs),
+                "flagged_strong": sum(flagged(r, tool, True) for r in rs),
+                "crashed": sum(bool(r[tool + "_crash"]) for r in rs),
+            }
+        t["rules_on_wrong_result"] = dict(
+            collections.Counter(
+                f["rule"] for r in groups["pred_wrong_result"] for f in r[tool]
+            ).most_common()
+        )
         summary["tools"][tool] = t
-    any_tool = lambda r: any(flagged(r, tool, False) for tool in TOOLS)
+    def any_tool(r):
+        return any(flagged(r, tool, False) for tool in TOOLS)
+
     summary["any_tool_flags_wrong_result"] = sum(map(any_tool, groups["pred_wrong_result"]))
     for g, rs in groups.items():
         kinds = collections.Counter(m["kind"] for r in rs for m in r["missing_values"])
-        summary["value_check"][g] = {"n": len(rs),
-                                     "queries_with_missing_value": sum(bool(r["missing_values"]) for r in rs),
-                                     "by_kind": dict(kinds)}
+        summary["value_check"][g] = {
+            "n": len(rs),
+            "queries_with_missing_value": sum(bool(r["missing_values"]) for r in rs),
+            "by_kind": dict(kinds),
+        }
     wr = groups["pred_wrong_result"]
     summary["value_vs_tools_on_wrong_result"] = {
         "value_flag_only": sum(bool(r["missing_values"]) and not any_tool(r) for r in wr),

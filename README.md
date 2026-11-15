@@ -45,7 +45,8 @@ and returns a repair hint the AI can act on. For join double-counting it relies 
 existing tool [grainguard](https://github.com/rohitchaurasia195-web/GRAINGUARD) rather than
 reinventing it.
 
-> Status: milestone M0 (baseline and go/pivot check) is done; M1 (data profiler) is next.
+> Status: M0 (baseline, go/pivot check) and M1 (data profiler) are done; M2 (the checks)
+> is next.
 > Every number in this README is measured, with the benchmark and model named.
 > Milestone reviews: [docs/milestones/](docs/milestones/).
 
@@ -87,6 +88,18 @@ data/bird_mini_dev/
 ```
 
 Put the data somewhere else by setting `PLUMBLINE_BIRD_DIR`.
+
+## Profile a database (M1)
+
+```bash
+plumbline profile data/bird_mini_dev/.../california_schools.sqlite -o california_schools.json
+python -m bench.profile_all      # all 11 BIRD databases + a 10-column hand-check
+```
+
+The catalog records, for every column: row, null and distinct counts, uniqueness, number
+and date ranges, the full value list when there are at most 200 values, and text formats
+such as `9{14}` (a 14-digit code). Profiling all 11 BIRD databases (798 columns) takes
+about 6 minutes on a home PC. See [docs/milestones/m1-review.md](docs/milestones/m1-review.md).
 
 ## Run the M0 baseline
 

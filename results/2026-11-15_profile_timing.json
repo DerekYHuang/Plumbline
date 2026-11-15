@@ -1,0 +1,295 @@
+{
+ "total_seconds": 374.4,
+ "databases": {
+  "california_schools": {
+   "seconds": 5.083,
+   "tables": 3,
+   "columns": 89,
+   "rows": 29941,
+   "db_mb": 10.6,
+   "catalog_kb": 146
+  },
+  "card_games": {
+   "seconds": 75.966,
+   "tables": 6,
+   "columns": 115,
+   "rows": 803445,
+   "db_mb": 249.7,
+   "catalog_kb": 212
+  },
+  "codebase_community": {
+   "seconds": 91.515,
+   "tables": 8,
+   "columns": 71,
+   "rows": 740646,
+   "db_mb": 459.1,
+   "catalog_kb": 148
+  },
+  "debit_card_specializing": {
+   "seconds": 4.531,
+   "tables": 5,
+   "columns": 21,
+   "rows": 423050,
+   "db_mb": 33.0,
+   "catalog_kb": 29
+  },
+  "european_football_2": {
+   "seconds": 168.929,
+   "tables": 7,
+   "columns": 199,
+   "rows": 222796,
+   "db_mb": 570.1,
+   "catalog_kb": 491
+  },
+  "financial": {
+   "seconds": 18.992,
+   "tables": 8,
+   "columns": 55,
+   "rows": 1079680,
+   "db_mb": 68.0,
+   "catalog_kb": 97
+  },
+  "formula_1": {
+   "seconds": 7.322,
+   "tables": 13,
+   "columns": 94,
+   "rows": 493257,
+   "db_mb": 21.3,
+   "catalog_kb": 264
+  },
+  "student_club": {
+   "seconds": 0.622,
+   "tables": 8,
+   "columns": 48,
+   "rows": 42511,
+   "db_mb": 2.5,
+   "catalog_kb": 104
+  },
+  "superhero": {
+   "seconds": 0.212,
+   "tables": 10,
+   "columns": 31,
+   "rows": 10614,
+   "db_mb": 0.2,
+   "catalog_kb": 74
+  },
+  "thrombosis_prediction": {
+   "seconds": 0.831,
+   "tables": 3,
+   "columns": 64,
+   "rows": 15252,
+   "db_mb": 7.0,
+   "catalog_kb": 130
+  },
+  "toxicology": {
+   "seconds": 0.29,
+   "tables": 4,
+   "columns": 11,
+   "rows": 36922,
+   "db_mb": 2.6,
+   "catalog_kb": 16
+  }
+ },
+ "hand_check": [
+  {
+   "db": "european_football_2",
+   "table": "Match",
+   "column": "away_player_X9",
+   "ok": true,
+   "profiler": {
+    "rows": 25979,
+    "nulls": 1833,
+    "distinct": 9,
+    "num_max": 9,
+    "top_value_count": 7525
+   },
+   "direct_sql": {
+    "rows": 25979,
+    "nulls": 1833,
+    "distinct": 9,
+    "num_max": 9,
+    "top_value_count": 7525
+   }
+  },
+  {
+   "db": "card_games",
+   "table": "cards",
+   "column": "supertypes",
+   "ok": true,
+   "profiler": {
+    "rows": 56822,
+    "nulls": 48982,
+    "distinct": 8,
+    "num_max": null,
+    "top_value_count": 4286
+   },
+   "direct_sql": {
+    "rows": 56822,
+    "nulls": 48982,
+    "distinct": 8,
+    "num_max": null,
+    "top_value_count": 4286
+   }
+  },
+  {
+   "db": "european_football_2",
+   "table": "Match",
+   "column": "SJH",
+   "ok": true,
+   "profiler": {
+    "rows": 25979,
+    "nulls": 8882,
+    "distinct": 137,
+    "num_max": 23.0,
+    "top_value_count": 831
+   },
+   "direct_sql": {
+    "rows": 25979,
+    "nulls": 8882,
+    "distinct": 137,
+    "num_max": 23.0,
+    "top_value_count": 831
+   }
+  },
+  {
+   "db": "student_club",
+   "table": "expense",
+   "column": "link_to_budget",
+   "ok": true,
+   "profiler": {
+    "rows": 32,
+    "nulls": 0,
+    "distinct": 24,
+    "num_max": null,
+    "top_value_count": 3
+   },
+   "direct_sql": {
+    "rows": 32,
+    "nulls": 0,
+    "distinct": 24,
+    "num_max": null,
+    "top_value_count": 3
+   }
+  },
+  {
+   "db": "california_schools",
+   "table": "schools",
+   "column": "City",
+   "ok": true,
+   "profiler": {
+    "rows": 17686,
+    "nulls": 293,
+    "distinct": 1165,
+    "num_max": null,
+    "top_value_count": 837
+   },
+   "direct_sql": {
+    "rows": 17686,
+    "nulls": 293,
+    "distinct": 1165,
+    "num_max": null,
+    "top_value_count": 837
+   }
+  },
+  {
+   "db": "california_schools",
+   "table": "schools",
+   "column": "GSserved",
+   "ok": true,
+   "profiler": {
+    "rows": 17686,
+    "nulls": 5743,
+    "distinct": 81,
+    "num_max": null,
+    "top_value_count": 2688
+   },
+   "direct_sql": {
+    "rows": 17686,
+    "nulls": 5743,
+    "distinct": 81,
+    "num_max": null,
+    "top_value_count": 2688
+   }
+  },
+  {
+   "db": "financial",
+   "table": "trans",
+   "column": "bank",
+   "ok": true,
+   "profiler": {
+    "rows": 1056320,
+    "nulls": 782812,
+    "distinct": 13,
+    "num_max": null,
+    "top_value_count": 22285
+   },
+   "direct_sql": {
+    "rows": 1056320,
+    "nulls": 782812,
+    "distinct": 13,
+    "num_max": null,
+    "top_value_count": 22285
+   }
+  },
+  {
+   "db": "card_games",
+   "table": "cards",
+   "column": "colorIdentity",
+   "ok": true,
+   "profiler": {
+    "rows": 56822,
+    "nulls": 6224,
+    "distinct": 31,
+    "num_max": null,
+    "top_value_count": 8802
+   },
+   "direct_sql": {
+    "rows": 56822,
+    "nulls": 6224,
+    "distinct": 31,
+    "num_max": null,
+    "top_value_count": 8802
+   }
+  },
+  {
+   "db": "european_football_2",
+   "table": "Match",
+   "column": "away_player_8",
+   "ok": true,
+   "profiler": {
+    "rows": 25979,
+    "nulls": 1341,
+    "distinct": 4249,
+    "num_max": 717248,
+    "top_value_count": 69
+   },
+   "direct_sql": {
+    "rows": 25979,
+    "nulls": 1341,
+    "distinct": 4249,
+    "num_max": 717248,
+    "top_value_count": 69
+   }
+  },
+  {
+   "db": "formula_1",
+   "table": "lapTimes",
+   "column": "time",
+   "ok": true,
+   "profiler": {
+    "rows": 400524,
+    "nulls": 0,
+    "distinct": 66694,
+    "num_max": null,
+    "top_value_count": 31
+   },
+   "direct_sql": {
+    "rows": 400524,
+    "nulls": 0,
+    "distinct": 66694,
+    "num_max": null,
+    "top_value_count": 31
+   }
+  }
+ ]
+}
