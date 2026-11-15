@@ -109,7 +109,8 @@ on almost every table (thrombosis_prediction 2/3, superhero 8/10).
   Fan-out flags were checked by hand only on q403/q106/q58. The value check is a 60-line
   prototype that only understands `=` and `IN` on string literals.
 
-**Recommended decision: GO, repositioned.** Plumbline's core is value and schema
-grounding (wrong filter values, invented IDs, case mismatches), which no existing tool
-covers. For fan-out, reuse grainguard (MIT) as a dependency or benchmark against it,
-instead of writing a rival rule. Pending Derek's confirmation.
+**Decision (confirmed by Derek, 2026-11-15): GO, repositioned.** Plumbline's core is
+value and schema grounding (wrong filter values, invented IDs, case mismatches), which no
+existing tool covers. For fan-out, reuse grainguard (MIT) as a dependency or benchmark
+against it, instead of writing a rival rule. M0 is closed except the two extra seed runs
+(r2, r3), which Derek runs on his own time.
