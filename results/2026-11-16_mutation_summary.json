@@ -1,0 +1,420 @@
+{
+ "date": "2026-11-16",
+ "operators": {
+  "case_flip": {
+   "silent": {
+    "k": 256,
+    "n": 315,
+    "pct": 81.3,
+    "ci95": [
+     76.6,
+     85.2
+    ],
+    "rules": {
+     "VALUE_CASE": 255,
+     "FANOUT": 8,
+     "CHASM": 1
+    }
+   },
+   "crash": {
+    "k": 0,
+    "n": 0,
+    "pct": null,
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "rules": {}
+   }
+  },
+  "value_typo": {
+   "silent": {
+    "k": 191,
+    "n": 241,
+    "pct": 79.3,
+    "ci95": [
+     73.7,
+     83.9
+    ],
+    "rules": {
+     "VALUE_MISSING": 185,
+     "FANOUT": 7,
+     "VALUE_FORMAT": 5,
+     "CHASM": 1
+    }
+   },
+   "crash": {
+    "k": 0,
+    "n": 0,
+    "pct": null,
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "rules": {}
+   }
+  },
+  "leading_zero": {
+   "silent": {
+    "k": 2,
+    "n": 2,
+    "pct": 100.0,
+    "ci95": [
+     34.2,
+     100.0
+    ],
+    "rules": {
+     "VALUE_FORMAT": 2
+    }
+   },
+   "crash": {
+    "k": 0,
+    "n": 0,
+    "pct": null,
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "rules": {}
+   }
+  },
+  "column_typo": {
+   "silent": {
+    "k": 70,
+    "n": 107,
+    "pct": 65.4,
+    "ci95": [
+     56.0,
+     73.8
+    ],
+    "rules": {
+     "SCHEMA_COLUMN": 69,
+     "FANOUT": 2
+    }
+   },
+   "crash": {
+    "k": 330,
+    "n": 342,
+    "pct": 96.5,
+    "ci95": [
+     94.0,
+     98.0
+    ],
+    "rules": {
+     "SCHEMA_COLUMN": 329,
+     "FANOUT": 14,
+     "CHASM": 2
+    }
+   }
+  },
+  "table_typo": {
+   "silent": {
+    "k": 1,
+    "n": 1,
+    "pct": 100.0,
+    "ci95": [
+     20.7,
+     100.0
+    ],
+    "rules": {
+     "FANOUT": 1
+    }
+   },
+   "crash": {
+    "k": 497,
+    "n": 499,
+    "pct": 99.6,
+    "ci95": [
+     98.6,
+     99.9
+    ],
+    "rules": {
+     "SCHEMA_TABLE": 496,
+     "FANOUT": 7,
+     "SCHEMA_COLUMN": 5
+    }
+   }
+  },
+  "drop_distinct": {
+   "silent": {
+    "k": 27,
+    "n": 77,
+    "pct": 35.1,
+    "ci95": [
+     25.3,
+     46.2
+    ],
+    "rules": {
+     "FANOUT": 25,
+     "CHASM": 3
+    }
+   },
+   "crash": {
+    "k": 0,
+    "n": 0,
+    "pct": null,
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "rules": {}
+   }
+  }
+ },
+ "discarded_equivalent": 53,
+ "discarded_timeout": 0,
+ "questions": {
+  "ok": 500
+ },
+ "all_silent": {
+  "k": 547,
+  "n": 743,
+  "pct": 73.6,
+  "ci95": [
+   70.3,
+   76.7
+  ]
+ },
+ "missed_examples": [
+  {
+   "question_id": 7,
+   "operator": "case_flip",
+   "change": "'Alusine' -> 'alusine'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 7,
+   "operator": "value_typo",
+   "change": "'Alusine' -> 'Aluine'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 10,
+   "operator": "case_flip",
+   "change": "'San Diego' -> 'san diego'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 10,
+   "operator": "value_typo",
+   "change": "'San Diego' -> 'San iego'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 11,
+   "operator": "column_typo",
+   "change": "start_rank -> start_ran",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 18,
+   "operator": "case_flip",
+   "change": "'San Francisco' -> 'san francisco'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 18,
+   "operator": "value_typo",
+   "change": "'San Francisco' -> 'San Frncisco'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 20,
+   "operator": "column_typo",
+   "change": "District -> Distric",
+   "outcome": "crash"
+  },
+  {
+   "question_id": 30,
+   "operator": "column_typo",
+   "change": "AvgScrWrite -> AvgScrWrit",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 36,
+   "operator": "column_typo",
+   "change": "free_rate -> free_rat",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 40,
+   "operator": "column_typo",
+   "change": "code_num -> code_nu",
+   "outcome": "crash"
+  },
+  {
+   "question_id": 52,
+   "operator": "case_flip",
+   "change": "'Benalish Knight' -> 'benalish knight'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 52,
+   "operator": "value_typo",
+   "change": "'Benalish Knight' -> 'Benalis Knight'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 60,
+   "operator": "case_flip",
+   "change": "'Coldsnap' -> 'coldsnap'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 60,
+   "operator": "value_typo",
+   "change": "'Coldsnap' -> 'Coldnap'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 63,
+   "operator": "case_flip",
+   "change": "'Tarmogoyf' -> 'tarmogoyf'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 63,
+   "operator": "value_typo",
+   "change": "'Tarmogoyf' -> 'Tarmgoyf'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 67,
+   "operator": "case_flip",
+   "change": "\"Mishra's Factory\" -> \"Mishra'S Factory\"",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 67,
+   "operator": "value_typo",
+   "change": "\"Mishra's Factory\" -> \"Mishra'sFactory\"",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 67,
+   "operator": "drop_distinct",
+   "change": "COUNT(DISTINCT x) -> COUNT(x)",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 70,
+   "operator": "case_flip",
+   "change": "'Tarmogoyf' -> 'tarmogoyf'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 70,
+   "operator": "value_typo",
+   "change": "'Tarmogoyf' -> 'Tarmgoyf'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 73,
+   "operator": "case_flip",
+   "change": "'Abyssal Horror' -> 'abyssal horror'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 73,
+   "operator": "value_typo",
+   "change": "'Abyssal Horror' -> 'AbyssalHorror'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 77,
+   "operator": "case_flip",
+   "change": "'Dark Ascension' -> 'dark ascension'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 77,
+   "operator": "value_typo",
+   "change": "'Dark Ascension' -> 'Dark Asension'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 81,
+   "operator": "column_typo",
+   "change": "card_count -> card_coun",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 85,
+   "operator": "case_flip",
+   "change": "\"Ancestor's Chosen\" -> \"Ancestor'S Chosen\"",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 85,
+   "operator": "value_typo",
+   "change": "\"Ancestor's Chosen\" -> 'Ancestors Chosen'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 86,
+   "operator": "column_typo",
+   "change": "tail -> tai",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 87,
+   "operator": "case_flip",
+   "change": "'Fireball' -> 'fireball'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 87,
+   "operator": "value_typo",
+   "change": "'Fireball' -> 'Fireall'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 88,
+   "operator": "case_flip",
+   "change": "'Creature - Elf' -> 'creature - elf'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 88,
+   "operator": "value_typo",
+   "change": "'Creature - Elf' -> 'Creatur - Elf'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 88,
+   "operator": "column_typo",
+   "change": "ruling_count -> ruling_coun",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 89,
+   "operator": "drop_distinct",
+   "change": "COUNT(DISTINCT x) -> COUNT(x)",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 90,
+   "operator": "case_flip",
+   "change": "'John Avon' -> 'john avon'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 90,
+   "operator": "value_typo",
+   "change": "'John Avon' -> 'JohnAvon'",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 93,
+   "operator": "column_typo",
+   "change": "card_count -> card_coun",
+   "outcome": "silent"
+  },
+  {
+   "question_id": 94,
+   "operator": "column_typo",
+   "change": "number_of_cards -> number_of_card",
+   "outcome": "silent"
+  }
+ ]
+}

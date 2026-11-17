@@ -136,3 +136,48 @@ against it, instead of writing a rival rule.
   - **q496 tuning, flagged honestly:** the gold query's `IN` list names 2 metals absent
     from the data. A missing `IN` item is now a warning when another item exists. This
     was decided after seeing q496; a mutation test set in M3 will check for overfitting.
+
+## 2026-11-16
+
+- **M3 formal scoring** (`python -m bench.score_checks qwen7b-r1`, after the M3 fixes),
+  with 95% Wilson intervals:
+  - silent-error detection **68/308 = 22.1% (17.8–27.0)**: own rules 30/308 = 9.7%,
+    fan-out 41/308 = 13.3%;
+  - gold false alarms **9/500 = 1.8% (0.9–3.4)**, own rules 0/500;
+  - crashing answers stopped before running **127/146 = 87%**;
+  - precision on model answers **195/196 = 99.5%**;
+  - latency median 6.9 ms, p95 16.3 ms.
+- **Answer key checked, not trusted:** all 9 flagged gold queries read by hand. The gold
+  answer is right in all 9; all are grainguard false alarms. Patterns: a WHERE filter on
+  part of a key, a dependent column in DISTINCT, or a question that counts the many
+  side. q235 was confirmed in the data (no client holds two classic cards).
+- **30 flagged silent errors read:** 25 flags name a real defect (23 the main cause).
+  Found and fixed 2 value-rule bugs:
+  - q400: `NOT LIKE` is a `negate` flag on SQLGlot's Like node, not a Not wrapper.
+  - q315: an OR-ed pattern covers one that matches nothing.
+  Detection went 71 → 68; all 3 lost catches were harmless filters.
+- **30 unflagged silent errors read:**
+  - 15 are intent errors (misread question, wrong logic), which no data check can see;
+  - 5 compare or sort a text column as a number;
+  - 5 hit placeholder values (`'NaN'`, `'-'`, `0`, `''`);
+  - 2 lose rows to an inner join on a nullable key;
+  - 3 are fan-outs grainguard missed.
+  Details: [m3-hand-review.md](m3-hand-review.md).
+- **Second model smoke test:** `qwen3.5:4b` works with the pipeline (3/3 SQL extracted,
+  none truncated, about 30 s per question after loading). Derek runs the full set.
+- **Mutation set** (`bench.mutate`): 1,637 mutants of the 500 gold queries, each one
+  executed; 53 equivalent mutants discarded, 1,584 kept.
+  - Silent faults caught: **547/743 = 73.6%**. By type: wrong capitalisation 81%, value
+    typo 79%, column typo 65%, dropped DISTINCT (fan-out) 35%.
+  - Crashing name typos: 97–100%.
+  - Misses explained:
+    - 91 are values of columns with more than 200 values (no complete list);
+    - 11 filter a WITH-block column;
+    - 37 silent column typos are WITH-block columns that SQLite turns into string
+      literals.
+  - **It caught an overfit rule:** the M2 q496 IN-list downgrade hid 14 real typos.
+    Fixed: a missing value within 0.8 similarity of a real one stays an error. Value
+    typos 75% → 79%, gold false alarms unchanged (0 from own rules).
+  - The first build hung silently at question 213. The rerun (flushed output,
+    per-query log, `--resume`, stall watcher) finished without a hang; root cause
+    unknown.

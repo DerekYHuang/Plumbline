@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+<title id="t">Detection vs false alarms, by checker</title>
+<desc id="d">Scatter. Plumbline all rules: Plumbline (all rules) 22.1% detection at 1.8% false alarms; Plumbline (own rules) 9.7% detection at 0.0% false alarms; sqlsure 17.2% detection at 8.2% false alarms; grainguard 14.3% detection at 2.0% false alarms; graincheck 15.6% detection at 3.4% false alarms.</desc>
+<style>
+  .bg{fill:#fcfcfb} .grid{stroke:#e1e0d9;stroke-width:1} .axis{stroke:#c3c2b7;stroke-width:1}
+  .tick{fill:#898781;font-size:11px} .lab{fill:#0b0b0b;font-size:12px}
+  .sub{fill:#52514e;font-size:12px} .ttl{fill:#0b0b0b;font-size:14px;font-weight:600}
+  .tgt{stroke:#898781;stroke-width:1;stroke-dasharray:4 4;fill:none}
+  .plumbline{fill:#2a78d6} .other{fill:#eb6834} .ring{stroke:#fcfcfb;stroke-width:2}
+  @media (prefers-color-scheme: dark){
+    .bg{fill:#1a1a19} .grid{stroke:#2c2c2a} .axis{stroke:#383835}
+    .lab,.ttl{fill:#f0efec} .sub{fill:#c3c2b7}
+    .plumbline{fill:#3987e5} .other{fill:#d95926} .ring{stroke:#1a1a19}
+  }
+</style>
+<rect class="bg" x="0" y="0" width="640" height="400" rx="8"/>
+<text class="ttl" x="64" y="24">Silent errors caught vs correct queries wrongly flagged</text>
+<text class="sub" x="64" y="40">BIRD Mini-Dev, qwen2.5-coder:7b answers. Up and to the left is better.</text>
+<line class="grid" x1="64" x2="616" y1="344.0" y2="344.0"/>
+<text class="tick" x="56" y="348.0" text-anchor="end">0%</text>
+<line class="grid" x1="64" x2="616" y1="284.8" y2="284.8"/>
+<text class="tick" x="56" y="288.8" text-anchor="end">10%</text>
+<line class="grid" x1="64" x2="616" y1="225.6" y2="225.6"/>
+<text class="tick" x="56" y="229.6" text-anchor="end">20%</text>
+<line class="grid" x1="64" x2="616" y1="166.4" y2="166.4"/>
+<text class="tick" x="56" y="170.4" text-anchor="end">30%</text>
+<line class="grid" x1="64" x2="616" y1="107.19999999999999" y2="107.19999999999999"/>
+<text class="tick" x="56" y="111.19999999999999" text-anchor="end">40%</text>
+<line class="grid" x1="64" x2="616" y1="48.0" y2="48.0"/>
+<text class="tick" x="56" y="52.0" text-anchor="end">50%</text>
+<text class="tick" x="64.0" y="362" text-anchor="middle">0%</text>
+<text class="tick" x="174.4" y="362" text-anchor="middle">2%</text>
+<text class="tick" x="284.8" y="362" text-anchor="middle">4%</text>
+<text class="tick" x="395.2" y="362" text-anchor="middle">6%</text>
+<text class="tick" x="505.6" y="362" text-anchor="middle">8%</text>
+<text class="tick" x="616.0" y="362" text-anchor="middle">10%</text>
+<line class="axis" x1="64" x2="616" y1="344.0" y2="344.0"/>
+<line class="tgt" x1="64" x2="616" y1="107.19999999999999" y2="107.19999999999999"/>
+<line class="tgt" x1="340.0" x2="340.0" y1="56" y2="344.0"/>
+<text class="tick" x="616" y="101.19999999999999" text-anchor="end">target: 40%+ detection</text>
+<text class="tick" x="346.0" y="66">target: 5% or fewer false alarms</text>
+<text class="sub" x="340.0" y="386" text-anchor="middle">False alarms on 500 correct (gold) queries</text>
+<text class="sub" transform="translate(16 196.0) rotate(-90)" text-anchor="middle">Silent wrong answers caught (of 308)</text>
+<circle class="plumbline ring" cx="163.36" cy="213.168" r="6"/>
+<text class="lab" x="173.36" y="203.168" text-anchor="start">Plumbline (all rules): 22.1% / 1.8%</text>
+<circle class="plumbline ring" cx="64.0" cy="286.576" r="6"/>
+<text class="lab" x="74.0" y="308.576" text-anchor="start">Plumbline (own rules): 9.7% / 0.0%</text>
+<circle class="other ring" cx="516.64" cy="242.176" r="6"/>
+<text class="lab" x="506.64" y="230.176" text-anchor="end">sqlsure: 17.2% / 8.2%</text>
+<circle class="other ring" cx="174.4" cy="259.344" r="6"/>
+<text class="lab" x="184.4" y="277.344" text-anchor="start">grainguard: 14.3% / 2.0%</text>
+<circle class="other ring" cx="251.68" cy="251.64800000000002" r="6"/>
+<text class="lab" x="261.68" y="241.64800000000002" text-anchor="start">graincheck: 15.6% / 3.4%</text>
+<circle class="plumbline" cx="406" cy="298" r="5"/>
+<text class="sub" x="416" y="302">Plumbline</text>
+<circle class="other" cx="406" cy="316" r="5"/>
+<text class="sub" x="416" y="320">Existing open-source checkers</text>
+</svg>

@@ -93,6 +93,47 @@ def test_like_pattern_matching_nothing(school_catalog):
     assert (f.rule, f.severity) == ("LIKE_NO_MATCH", "error")
 
 
+@pytest.mark.parametrize(
+    "sql",
+    [
+        # M0 q400: NOT LIKE a pattern nothing matches excludes nothing
+        "SELECT 1 FROM schools WHERE FundingType NOT LIKE '%suspect%'",
+        # NOT (...) around an equality, hidden behind parentheses
+        "SELECT 1 FROM schools WHERE NOT (County = 'Marin')",
+        # M0 q315: the OR-ed pattern covers the one that matches nothing
+        "SELECT 1 FROM schools WHERE FundingType LIKE '%funded%' OR FundingType LIKE '%charter%'",
+        # an OR-ed equality on the same column covers the missing one
+        "SELECT 1 FROM schools WHERE County = 'Orange' OR County = 'Marin'",
+    ],
+)
+def test_harmless_missing_values_are_warnings(school_catalog, sql):
+    r = check_sql(sql, school_catalog)
+    assert r.passed, [f.message for f in r.errors]
+    assert [f.severity for f in r.findings] == ["warning"]
+
+
+def test_in_list_typo_of_a_real_value_is_still_an_error(school_catalog):
+    # Found by the M3 mutation set: 'Locally fundd' drops the 'Locally funded' rows even
+    # though 'Directly funded' in the same list matches.
+    sql = "SELECT 1 FROM schools WHERE FundingType IN ('Directly funded', 'Locally fundd')"
+    (f,) = value_findings(sql, school_catalog)
+    assert (f.rule, f.severity) == ("VALUE_MISSING", "error")
+    assert "'Locally funded'" in f.hint
+
+
+def test_or_does_not_excuse_a_case_slip(school_catalog):
+    # 'kern' really drops the Kern rows even though 'Orange' matches: still an error.
+    r = check_sql(
+        "SELECT 1 FROM schools WHERE County = 'Orange' OR County = 'kern'", school_catalog
+    )
+    assert [(f.rule, f.severity) for f in r.findings] == [("VALUE_CASE", "error")]
+
+
+def test_or_on_a_different_column_does_not_cover(school_catalog):
+    r = check_sql("SELECT 1 FROM schools WHERE County = 'Marin' OR Virtual = 'F'", school_catalog)
+    assert [(f.rule, f.severity) for f in r.findings] == [("VALUE_MISSING", "error")]
+
+
 def test_not_equal_to_missing_value_is_only_a_warning(school_catalog):
     r = check_sql("SELECT 1 FROM schools WHERE County != 'Marin'", school_catalog)
     (f,) = r.findings

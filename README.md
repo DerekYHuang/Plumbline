@@ -45,8 +45,29 @@ and returns a repair hint the AI can act on. For join double-counting it relies 
 existing tool [grainguard](https://github.com/rohitchaurasia195-web/GRAINGUARD) rather than
 reinventing it.
 
-> Status: M0 (baseline), M1 (profiler) and M2 (checks) are done; M3 (formal scoring) is
-> next.
+> Status: M0–M3 done (baseline, profiler, checks, scoring); M4 (packaging, v0.1) is next.
+
+## Results
+
+Measured on BIRD Mini-Dev (500 questions, 11 SQLite databases), with answers written by
+`qwen2.5-coder:7b`. Ranges are 95% confidence intervals.
+
+| | Result |
+|---|---|
+| Silent wrong answers caught before running | **22.1%** (68 of 308; 17.8–27.0%) |
+| Correct queries wrongly flagged | **1.8%** (9 of 500; 0.9–3.4%), all from the fan-out rule; **0%** from Plumbline's own rules |
+| When Plumbline fails an AI answer, it really is wrong | **99.5%** (195 of 196) |
+| Crashing answers stopped before running | 87% (127 of 146) |
+| Time per check | 6.9 ms median, 16.3 ms at the 95th percentile |
+| One-off profiling, all 11 databases | 6.2 minutes |
+| Injected faults caught (correct queries broken on purpose, each one executed to confirm the answer changed) | wrong capitalisation **81%**, value typo **79%**, crashing name typos 97–100%, fan-out 35%; all silent faults **73.6%** (547 of 743) |
+
+![Silent errors caught vs correct queries wrongly flagged, Plumbline vs existing checkers](results/detection_vs_false_alarms.svg)
+
+**What it doesn't catch:** half of the missed wrong answers are *intent* errors (the AI
+misread the question), which no check on data or schema can see. Details, and every
+flagged query read by hand: [docs/m3-hand-review.md](docs/m3-hand-review.md).
+Reproduce: `python -m bench.score_checks qwen7b-r1`.
 > Every number in this README is measured, with the benchmark and model named.
 > Milestone reviews: [docs/milestones/](docs/milestones/).
 
@@ -118,9 +139,8 @@ From Python: `plumbline.check_sql(sql, Catalog.load(path))`.
 | `SCHEMA_ALIAS` | one alias for two tables, which SQLite silently accepts |
 | `FANOUT` / `CHASM` | totals inflated by a join (via [grainguard](https://github.com/rohitchaurasia195-web/GRAINGUARD), optional extra `[fanout]`) |
 
-Preliminary result on the M0 queries: 23% of the silent wrong answers flagged, at 1.8%
-false alarms on correct queries. Plumbline's own rules alone catch 33 silent errors with 0
-false alarms. See [docs/milestones/m2-review.md](docs/milestones/m2-review.md).
+How well these rules work is measured in [Results](#results). Design notes:
+[docs/milestones/m2-review.md](docs/milestones/m2-review.md).
 
 ## Profile a database (M1)
 

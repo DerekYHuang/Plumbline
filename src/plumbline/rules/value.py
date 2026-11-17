@@ -47,6 +47,9 @@ from plumbline.rules._match import closest, quote_list
 # A sampled format is trusted only if (nearly) every sampled value has it.
 DOMINANT_SHAPE_SHARE = 0.95
 SHOW_VALUES = 8  # how many real values to show when nothing is close
+# Similarity (difflib ratio, 0..1) above which a missing value counts as a typo of a real
+# one. 'Directl funded'/'Directly funded' = 0.97; 'li'/'i' = 0.67 (not a typo).
+TYPO_CUTOFF = 0.8
 
 
 def check(query: ParsedQuery, catalog: Catalog) -> list[Finding]:
@@ -56,7 +59,15 @@ def check(query: ParsedQuery, catalog: Catalog) -> list[Finding]:
         ref = query.ref_for(col)
         if ref is None or ref.status != RESOLVED or ref.profile is None:
             continue
-        f = _judge(ref.table.name, ref.profile, literal, negated, like, node)
+        f = _judge(
+            ref.table.name,
+            ref.profile,
+            literal,
+            negated,
+            like,
+            node,
+            covered=_alternative_matches(node, col, ref.profile),
+        )
         if f is None:
             continue
         key = (f.rule, ref.table.name, ref.profile.name, repr(literal))
@@ -85,29 +96,93 @@ def _literal_value(node: exp.Expression) -> Any:
     return None
 
 
-def _comparisons(tree: exp.Expression):
-    """Yield (node, column, literal value, negated, is_like) for each column-vs-literal test."""
-    for node in tree.find_all(exp.EQ, exp.NEQ, exp.Like, exp.In):
-        negated = isinstance(node, exp.NEQ) or isinstance(node.parent, exp.Not)
-        like = isinstance(node, exp.Like)
-        if isinstance(node, exp.In):
-            if not isinstance(node.this, exp.Column) or node.args.get("query"):
-                continue
+def _is_negated(node: exp.Expression) -> bool:
+    """Is this test inverted? `!=`, `NOT LIKE`, `NOT IN`, `NOT (x = 'a')`, ...
+
+    SQLGlot spells these differently: NOT LIKE is a Like node with negate=True,
+    NOT IN is Not(In), NOT (...) is Not(Paren(...)). Every NOT up the tree flips it.
+    (Getting this wrong flagged M0 q400's harmless `NOT LIKE '%suspect%'`.)
+    """
+    neg = isinstance(node, exp.NEQ) or bool(node.args.get("negate"))
+    cur = node.parent
+    while cur is not None and not isinstance(cur, (exp.Where, exp.Having, exp.Join, exp.Select)):
+        if isinstance(cur, exp.Not):
+            neg = not neg
+        cur = cur.parent
+    return neg
+
+
+def _node_comparisons(node: exp.Expression):
+    """(column, literal value, is_like) for one EQ / NEQ / LIKE / IN node."""
+    like = isinstance(node, exp.Like)
+    if isinstance(node, exp.In):
+        if isinstance(node.this, exp.Column) and not node.args.get("query"):
             for item in node.expressions:
                 v = _literal_value(item)
                 if v is not None:
-                    yield node, node.this, v, negated, False
-            continue
-        left, right = node.this, node.expression
-        if isinstance(left, exp.Column):
-            col, lit = left, right
-        elif isinstance(right, exp.Column) and not like:
-            col, lit = right, left
-        else:
-            continue
-        v = _literal_value(lit)
-        if v is not None:
+                    yield node.this, v, False
+        return
+    left, right = node.this, node.expression
+    if isinstance(left, exp.Column):
+        col, lit = left, right
+    elif isinstance(right, exp.Column) and not like:
+        col, lit = right, left
+    else:
+        return
+    v = _literal_value(lit)
+    if v is not None:
+        yield col, v, like
+
+
+def _comparisons(tree: exp.Expression):
+    """Yield (node, column, literal value, negated, is_like) for each column-vs-literal test."""
+    for node in tree.find_all(exp.EQ, exp.NEQ, exp.Like, exp.In):
+        negated = _is_negated(node)
+        for col, v, like in _node_comparisons(node):
             yield node, col, v, negated, like
+
+
+def _same_column(a: exp.Column, b: exp.Column) -> bool:
+    return a.name.lower() == b.name.lower() and a.table.lower() == b.table.lower()
+
+
+def _matches(p: ColumnProfile, v: Any, like: bool) -> bool:
+    if like:
+        if not (p.values_complete and isinstance(v, str)):
+            return True  # can't tell: assume it matches (never raise a false alarm)
+        rx = _like_regex(v)
+        return any(rx.fullmatch(str(x)) for x, _ in p.values if x is not None)
+    return _membership(p, v)[0] in ("yes", "unknown")
+
+
+def _alternative_matches(node: exp.Expression, col: exp.Column, p: ColumnProfile) -> bool:
+    """Does another condition on the same column, OR-ed with this one, match real rows?
+
+    `element IN ('na', 'k', 'mg')`, 'mg' absent: the list still works (gold query q496).
+    `desc LIKE '%water%' OR desc LIKE '%bottled drinking water%'`: the second pattern
+    matches nothing, but the first covers it (M0 q315). Either way the missing value
+    can't change the result, so it is a warning, not an error.
+    """
+    alternatives = []
+    if isinstance(node, exp.In):
+        alternatives.append(node)
+    cur = node
+    while isinstance(cur.parent, exp.Paren):
+        cur = cur.parent
+    if isinstance(cur.parent, exp.Or):
+        top = cur.parent
+        while isinstance(top.parent, (exp.Or, exp.Paren)):
+            top = top.parent
+        alternatives.extend(top.find_all(exp.EQ, exp.Like, exp.In))
+    for other in alternatives:
+        for c2, v2, like2 in _node_comparisons(other):
+            if not _same_column(c2, col) or (other is node and not isinstance(node, exp.In)):
+                continue
+            if other is node and isinstance(node, exp.In) and _membership(p, v2)[0] != "yes":
+                continue  # an IN item counts as the alternative only if it truly exists
+            if _matches(p, v2, like2):
+                return True
+    return False
 
 
 # ---------------------------------------------------------------- judging one literal
@@ -163,25 +238,35 @@ def _evidence(table: str, p: ColumnProfile, v: Any, **extra) -> dict:
 
 
 def _judge(
-    table: str, p: ColumnProfile, v: Any, negated: bool, like: bool, node: exp.Expression
+    table: str,
+    p: ColumnProfile,
+    v: Any,
+    negated: bool,
+    like: bool,
+    node: exp.Expression,
+    covered: bool = False,
 ) -> Finding | None:
+    """covered: another OR-ed condition on the same column matches, so a value that simply
+    doesn't exist can't change the result (a capitalisation slip still can: it drops rows)."""
     where = f"{table}.{p.name}"
     snippet = node.sql(dialect="sqlite")
     if like:
-        return None if negated else _judge_like(table, p, v, snippet)
+        return _judge_like(table, p, v, snippet, negated, covered)
 
     state, real = _membership(p, v)
     if state == "yes":
         return None
     sev = WARNING if negated else ERROR
-    useless = " so this filter excludes nothing" if negated else ""
+    useless = ", so this filter excludes nothing" if negated else ""
 
     if state == "case":
         return Finding(
             rule="VALUE_CASE",
             severity=sev,
-            message=(f"{v!r} is not a value of {where}; the data has {real!r} "
-                     f"(differs only in capitalisation or spaces){useless}."),
+            message=(
+                f"{v!r} is not a value of {where}; the data has {real!r} "
+                f"(differs only in capitalisation or spaces){useless}."
+            ),
             hint=f"Use {real!r}.",
             snippet=snippet,
             evidence=_evidence(table, p, v, actual=real),
@@ -190,12 +275,15 @@ def _judge(
     if state == "no":
         stored = [x for x, _ in p.values if x is not None]
         near = closest(str(v), [str(x) for x in stored]) if stored else []
-        # `element IN ('na', 'k', 'mg')` where 'mg' never occurs but others do: the list
-        # still matches the rows it should, so the missing item changes nothing. Warn,
-        # don't fail. (Found on gold query q496, which lists 9 metals, 2 absent.)
-        if not negated and isinstance(node, exp.In) and _in_list_has_match(node, p):
+        # OR-ed with a value that does occur: harmless ONLY if this one isn't a near-miss
+        # of a real value. `IN ('na', 'k', 'mg')` with 'mg' absent lists something that
+        # doesn't occur (gold q496: fine). `IN ('Directl funded', 'Locally funded')` is a
+        # typo that silently drops the 'Directly funded' rows. The M3 mutation set showed
+        # the first version of this rule (warn whenever covered) hid such typos.
+        typo_of = closest(str(v), [str(x) for x in stored], n=1, cutoff=TYPO_CUTOFF)
+        if not negated and covered and not typo_of:
             sev = WARNING
-            useless = "; other items of the IN list do occur, so the result is unaffected"
+            useless = "; another value it is OR-ed with does occur, so the result is unaffected"
         if not stored:
             hint = f"{where} is always NULL."
         elif near:
@@ -207,8 +295,10 @@ def _judge(
         return Finding(
             rule="VALUE_MISSING",
             severity=sev,
-            message=(f"{v!r} never occurs in {where} "
-                     f"(it has {p.distinct_count} distinct values){useless}."),
+            message=(
+                f"{v!r} never occurs in {where} "
+                f"(it has {p.distinct_count} distinct values){useless}."
+            ),
             hint=hint,
             snippet=snippet,
             evidence=_evidence(table, p, v, closest=near),
@@ -220,17 +310,28 @@ def _judge(
     s = str(v)
     example = next((str(x) for x, _ in p.values if x is not None), None)
     if p.text_len_min is not None and not (p.text_len_min <= len(s) <= p.text_len_max):
-        span = (f"{p.text_len_min}" if p.text_len_min == p.text_len_max
-                else f"{p.text_len_min} to {p.text_len_max}")
+        span = (
+            f"{p.text_len_min}"
+            if p.text_len_min == p.text_len_max
+            else f"{p.text_len_min} to {p.text_len_max}"
+        )
         return Finding(
             rule="VALUE_FORMAT",
             severity=ERROR,
-            message=(f"{s!r} has {len(s)} characters, but every value of {where} has "
-                     f"{span}, so it can never match."),
+            message=(
+                f"{s!r} has {len(s)} characters, but every value of {where} has "
+                f"{span}, so it can never match."
+            ),
             hint=_format_hint(p, s, example),
             snippet=snippet,
-            evidence=_evidence(table, p, v, length=len(s),
-                               length_range=[p.text_len_min, p.text_len_max], example=example),
+            evidence=_evidence(
+                table,
+                p,
+                v,
+                length=len(s),
+                length_range=[p.text_len_min, p.text_len_max],
+                example=example,
+            ),
         )
     if p.shapes and p.shapes[0][1] >= DOMINANT_SHAPE_SHARE:
         usual, lit_shape = p.shapes[0][0], value_shape(s)
@@ -238,23 +339,17 @@ def _judge(
             return Finding(
                 rule="VALUE_FORMAT",
                 severity=WARNING,
-                message=(f"Values of {where} look like {usual} (e.g. {example!r}); "
-                         f"{s!r} looks like {lit_shape}."),
+                message=(
+                    f"Values of {where} look like {usual} (e.g. {example!r}); "
+                    f"{s!r} looks like {lit_shape}."
+                ),
                 hint=_format_hint(p, s, example),
                 snippet=snippet,
-                evidence=_evidence(table, p, v, usual_format=usual, literal_format=lit_shape,
-                                   example=example),
+                evidence=_evidence(
+                    table, p, v, usual_format=usual, literal_format=lit_shape, example=example
+                ),
             )
     return None
-
-
-def _in_list_has_match(node: exp.In, p: ColumnProfile) -> bool:
-    """True if at least one literal of the IN list is an exact value of the column."""
-    for item in node.expressions:
-        v = _literal_value(item)
-        if v is not None and _membership(p, v)[0] == "yes":
-            return True
-    return False
 
 
 def _format_hint(p: ColumnProfile, s: str, example: str | None) -> str:
@@ -272,7 +367,9 @@ def _like_regex(pattern: str) -> re.Pattern:
     return re.compile("".join(out), re.IGNORECASE | re.DOTALL)
 
 
-def _judge_like(table: str, p: ColumnProfile, v: Any, snippet: str) -> Finding | None:
+def _judge_like(
+    table: str, p: ColumnProfile, v: Any, snippet: str, negated: bool, covered: bool
+) -> Finding | None:
     if not p.values_complete or not isinstance(v, str):
         return None
     stored = [str(x) for x, _ in p.values if x is not None]
@@ -282,13 +379,28 @@ def _judge_like(table: str, p: ColumnProfile, v: Any, snippet: str) -> Finding |
     core = v.replace("%", " ").replace("_", " ").strip()
     near = closest(core, stored) if core else []
     where = f"{table}.{p.name}"
+    # NOT LIKE a pattern nothing matches excludes nothing; an OR-ed pattern that does
+    # match covers for this one. Both are useless rather than wrong: warning.
+    harmless = negated or covered
+    why = (
+        ", so this NOT LIKE excludes nothing"
+        if negated
+        else "; another pattern it is OR-ed with does match, so the result is unaffected"
+        if covered
+        else ""
+    )
     return Finding(
         rule="LIKE_NO_MATCH",
-        severity=ERROR,
-        message=f"No value of {where} matches LIKE {v!r} (checked all {len(stored)} values).",
-        hint=(f"Did you mean {quote_list(near)}?" if near else
-              f"Values of {where}: {quote_list(stored[:SHOW_VALUES])}"
-              + (" ..." if len(stored) > SHOW_VALUES else ".")),
+        severity=WARNING if harmless else ERROR,
+        message=(
+            f"No value of {where} matches LIKE {v!r} (checked all {len(stored)} values){why}."
+        ),
+        hint=(
+            f"Did you mean {quote_list(near)}?"
+            if near
+            else f"Values of {where}: {quote_list(stored[:SHOW_VALUES])}"
+            + (" ..." if len(stored) > SHOW_VALUES else ".")
+        ),
         snippet=snippet,
         evidence=_evidence(table, p, v, closest=near),
     )
