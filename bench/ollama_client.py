@@ -26,6 +26,9 @@ class Generation:
     output_tokens: int     # tokens written
     seconds: float         # total wall-clock time reported by Ollama
     truncated: bool        # True if the answer hit num_predict and was cut off
+    # "Thinking" models (e.g. qwen3.5) return their reasoning separately from the answer.
+    # Its length shows whether the token budget went on reasoning instead of the SQL.
+    thinking_chars: int = 0
 
 
 class OllamaError(RuntimeError):
@@ -63,6 +66,7 @@ def generate(
         seconds=data.get("total_duration", 0) / 1e9,
         # done_reason is "length" when generation stopped at num_predict.
         truncated=data.get("done_reason") == "length",
+        thinking_chars=len(data.get("thinking") or ""),
     )
 
 
