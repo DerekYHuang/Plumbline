@@ -1,0 +1,30 @@
+{
+  "n_questions": 500,
+  "n_scored": 498,
+  "accuracy_pct": 9.84,
+  "accuracy_by_difficulty_pct": {
+    "challenging": 9.37,
+    "moderate": 9.38,
+    "simple": 42.86
+  },
+  "label_counts": {
+    "correct": 49,
+    "wrong_result": 262,
+    "exec_error": 79,
+    "timeout": 3,
+    "no_sql": 105,
+    "gold_error": 2
+  },
+  "run": {
+    "model": "qwen3.5:4b",
+    "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+    "options": {
+      "temperature": 0.0,
+      "seed": 42,
+      "num_ctx": 8192,
+      "num_predict": 1024
+    },
+    "questions_file": "G:\\Plumbline Project\\data\\bird_mini_dev\\mini_dev_sqlite.jsonl",
+    "started_at": "2026-11-17T18:31:46+00:00"
+  }
+}

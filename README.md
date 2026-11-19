@@ -64,6 +64,13 @@ Measured on BIRD Mini-Dev (500 questions, 11 SQLite databases), with answers wri
 
 ![Silent errors caught vs correct queries wrongly flagged, Plumbline vs existing checkers](results/detection_vs_false_alarms.svg)
 
+**Second model, held out** (`qwen3.5:4b`; rules frozen before its answers were seen):
+**23.7%** of its 262 silent wrong answers caught (18.9–29.2%), against 22.1% on the
+first model; own rules raised 0 false alarms on its 49 correct answers. This model made
+fewer value mistakes and more join mistakes, so fan-out caught more and the value rules
+less. (105 of its answers were empty because its reasoning used up the answer-length cap;
+this lowers its own accuracy, not the checker's results.)
+
 **What it doesn't catch:** half of the missed wrong answers are *intent* errors (the AI
 misread the question), which no check on data or schema can see. Details, and every
 flagged query read by hand: [docs/m3-hand-review.md](docs/m3-hand-review.md).

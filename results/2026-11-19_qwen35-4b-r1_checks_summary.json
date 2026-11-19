@@ -1,0 +1,327 @@
+{
+ "run_id": "qwen35-4b-r1",
+ "date": "2026-11-19",
+ "counts": {
+  "gold": 500,
+  "silent_wrong": 262,
+  "crashed": 82,
+  "pred_correct": 49
+ },
+ "detection_silent": {
+  "all_rules": {
+   "k": 62,
+   "n": 262,
+   "pct": 23.7,
+   "ci95": [
+    18.9,
+    29.2
+   ]
+  },
+  "own_rules_schema_value": {
+   "k": 17,
+   "n": 262,
+   "pct": 6.5,
+   "ci95": [
+    4.1,
+    10.1
+   ]
+  },
+  "value_rules": {
+   "k": 17,
+   "n": 262,
+   "pct": 6.5,
+   "ci95": [
+    4.1,
+    10.1
+   ]
+  },
+  "schema_rules": {
+   "k": 0,
+   "n": 262,
+   "pct": 0.0,
+   "ci95": [
+    0.0,
+    1.4
+   ]
+  },
+  "fanout_grainguard": {
+   "k": 48,
+   "n": 262,
+   "pct": 18.3,
+   "ci95": [
+    14.1,
+    23.5
+   ]
+  },
+  "own_rules_only_not_fanout": {
+   "k": 14,
+   "n": 262,
+   "pct": 5.3,
+   "ci95": [
+    3.2,
+    8.8
+   ]
+  }
+ },
+ "detection_by_difficulty": {
+  "challenging": {
+   "k": 57,
+   "n": 237,
+   "pct": 24.1,
+   "ci95": [
+    19.1,
+    29.9
+   ]
+  },
+  "moderate": {
+   "k": 5,
+   "n": 22,
+   "pct": 22.7,
+   "ci95": [
+    10.1,
+    43.4
+   ]
+  },
+  "simple": {
+   "k": 0,
+   "n": 3,
+   "pct": 0.0,
+   "ci95": [
+    0.0,
+    56.2
+   ]
+  }
+ },
+ "detection_by_db": {
+  "california_schools": {
+   "k": 3,
+   "n": 18,
+   "pct": 16.7,
+   "ci95": [
+    5.8,
+    39.2
+   ]
+  },
+  "card_games": {
+   "k": 13,
+   "n": 41,
+   "pct": 31.7,
+   "ci95": [
+    19.6,
+    47.0
+   ]
+  },
+  "codebase_community": {
+   "k": 3,
+   "n": 22,
+   "pct": 13.6,
+   "ci95": [
+    4.7,
+    33.3
+   ]
+  },
+  "debit_card_specializing": {
+   "k": 2,
+   "n": 8,
+   "pct": 25.0,
+   "ci95": [
+    7.1,
+    59.1
+   ]
+  },
+  "european_football_2": {
+   "k": 3,
+   "n": 11,
+   "pct": 27.3,
+   "ci95": [
+    9.7,
+    56.6
+   ]
+  },
+  "financial": {
+   "k": 6,
+   "n": 18,
+   "pct": 33.3,
+   "ci95": [
+    16.3,
+    56.3
+   ]
+  },
+  "formula_1": {
+   "k": 4,
+   "n": 33,
+   "pct": 12.1,
+   "ci95": [
+    4.8,
+    27.3
+   ]
+  },
+  "student_club": {
+   "k": 5,
+   "n": 19,
+   "pct": 26.3,
+   "ci95": [
+    11.8,
+    48.8
+   ]
+  },
+  "superhero": {
+   "k": 3,
+   "n": 34,
+   "pct": 8.8,
+   "ci95": [
+    3.0,
+    23.0
+   ]
+  },
+  "thrombosis_prediction": {
+   "k": 13,
+   "n": 43,
+   "pct": 30.2,
+   "ci95": [
+    18.6,
+    45.1
+   ]
+  },
+  "toxicology": {
+   "k": 7,
+   "n": 15,
+   "pct": 46.7,
+   "ci95": [
+    24.8,
+    69.9
+   ]
+  }
+ },
+ "false_alarms": {
+  "gold_all_rules": {
+   "k": 9,
+   "n": 500,
+   "pct": 1.8,
+   "ci95": [
+    0.9,
+    3.4
+   ]
+  },
+  "gold_own_rules": {
+   "k": 0,
+   "n": 500,
+   "pct": 0.0,
+   "ci95": [
+    0.0,
+    0.8
+   ]
+  },
+  "gold_fanout": {
+   "k": 9,
+   "n": 500,
+   "pct": 1.8,
+   "ci95": [
+    0.9,
+    3.4
+   ]
+  },
+  "pred_correct_all_rules": {
+   "k": 3,
+   "n": 49,
+   "pct": 6.1,
+   "ci95": [
+    2.1,
+    16.5
+   ]
+  }
+ },
+ "wasted_executions_avoided": {
+  "k": 57,
+  "n": 82,
+  "pct": 69.5,
+  "ci95": [
+   58.9,
+   78.4
+  ]
+ },
+ "precision_on_pred": {
+  "k": 121,
+  "n": 124,
+  "pct": 97.6,
+  "ci95": [
+   93.1,
+   99.2
+  ]
+ },
+ "warnings": {
+  "silent_with_warning": 8,
+  "gold_with_warning": 2
+ },
+ "rules_firing_on_silent": {
+  "FANOUT": 48,
+  "VALUE_CASE": 19,
+  "CHASM": 11,
+  "VALUE_MISSING": 7,
+  "VALUE_FORMAT": 4
+ },
+ "latency_ms": {
+  "median": 7.04,
+  "p95": 15.89,
+  "max": 262.59,
+  "n": 895
+ },
+ "gold_flagged": [
+  {
+   "question_id": 57,
+   "errors": [
+    "FANOUT",
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 91,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 132,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 201,
+   "errors": [
+    "FANOUT",
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 235,
+   "errors": [
+    "CHASM"
+   ]
+  },
+  {
+   "question_id": 276,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 430,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 477,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 482,
+   "errors": [
+    "FANOUT"
+   ]
+  }
+ ]
+}

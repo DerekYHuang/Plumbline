@@ -181,3 +181,25 @@ against it, instead of writing a rival rule.
   - The first build hung silently at question 213. The rerun (flushed output,
     per-query log, `--resume`, stall watcher) finished without a hang; root cause
     unknown.
+
+## 2026-11-19
+
+- **Held-out run `qwen35-4b-r1`** (qwen3.5:4b, run by Derek). Nobody looked at these
+  answers before scoring, and no rule was changed after looking.
+  - **Model accuracy 49/498 = 9.8%.** Not comparable as is: **105 answers are empty and
+    40 more were cut off.** qwen3.5:4b is a thinking model; Ollama returns its reasoning
+    separately, and our `num_predict: 1024` cap was used up by the reasoning before any
+    SQL. This is a pipeline setting, not the model failing. The fix is a larger cap, or
+    thinking turned off, for this model.
+  - 2 gold queries (q49, q163) timed out at 60 s. They take a few seconds alone, and a
+    different gold query timed out on each scoring run (q197 the first time) while the
+    PC was busy. They're environmental and excluded from accuracy only.
+- **Plumbline on the held-out answers** (`bench.score_checks qwen35-4b-r1`):
+  - silent wrong answers caught **62/262 = 23.7% (18.9–29.2)**, vs 22.1% on the
+    tuned set (qwen2.5-coder:7b), so no sign of overfitting in overall detection;
+  - by rule family: own rules **17/262 = 6.5%** (vs 9.7%); fan-out 48/262 = 18.3%
+    (vs 13.3%). This model makes fewer value slips and more join mistakes. Own-rule
+    catches: VALUE_CASE 19, VALUE_MISSING 7, VALUE_FORMAT 4;
+  - false alarms on the model's 49 correct answers: 3 (6.1%), **all fan-out**, the same
+    q57/q91 legality-filter pattern found in M3; own rules 0/49;
+  - precision 121/124 = 97.6%; crashing answers stopped 57/82 = 69.5%; p95 15.9 ms.
