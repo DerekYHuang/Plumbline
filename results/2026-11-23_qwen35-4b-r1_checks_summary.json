@@ -1,0 +1,328 @@
+{
+ "run_id": "qwen35-4b-r1",
+ "date": "2026-11-23",
+ "counts": {
+  "gold": 500,
+  "silent_wrong": 335,
+  "crashed": 76,
+  "pred_correct": 62
+ },
+ "detection_silent": {
+  "all_rules": {
+   "k": 85,
+   "n": 335,
+   "pct": 25.4,
+   "ci95": [
+    21.0,
+    30.3
+   ]
+  },
+  "own_rules_schema_value": {
+   "k": 29,
+   "n": 335,
+   "pct": 8.7,
+   "ci95": [
+    6.1,
+    12.2
+   ]
+  },
+  "value_rules": {
+   "k": 29,
+   "n": 335,
+   "pct": 8.7,
+   "ci95": [
+    6.1,
+    12.2
+   ]
+  },
+  "schema_rules": {
+   "k": 0,
+   "n": 335,
+   "pct": 0.0,
+   "ci95": [
+    0.0,
+    1.1
+   ]
+  },
+  "fanout_grainguard": {
+   "k": 61,
+   "n": 335,
+   "pct": 18.2,
+   "ci95": [
+    14.4,
+    22.7
+   ]
+  },
+  "own_rules_only_not_fanout": {
+   "k": 24,
+   "n": 335,
+   "pct": 7.2,
+   "ci95": [
+    4.9,
+    10.4
+   ]
+  }
+ },
+ "detection_by_difficulty": {
+  "challenging": {
+   "k": 79,
+   "n": 308,
+   "pct": 25.6,
+   "ci95": [
+    21.1,
+    30.8
+   ]
+  },
+  "moderate": {
+   "k": 5,
+   "n": 23,
+   "pct": 21.7,
+   "ci95": [
+    9.7,
+    41.9
+   ]
+  },
+  "simple": {
+   "k": 1,
+   "n": 4,
+   "pct": 25.0,
+   "ci95": [
+    4.6,
+    69.9
+   ]
+  }
+ },
+ "detection_by_db": {
+  "california_schools": {
+   "k": 8,
+   "n": 28,
+   "pct": 28.6,
+   "ci95": [
+    15.3,
+    47.1
+   ]
+  },
+  "card_games": {
+   "k": 16,
+   "n": 49,
+   "pct": 32.7,
+   "ci95": [
+    21.2,
+    46.6
+   ]
+  },
+  "codebase_community": {
+   "k": 4,
+   "n": 24,
+   "pct": 16.7,
+   "ci95": [
+    6.7,
+    35.9
+   ]
+  },
+  "debit_card_specializing": {
+   "k": 2,
+   "n": 10,
+   "pct": 20.0,
+   "ci95": [
+    5.7,
+    51.0
+   ]
+  },
+  "european_football_2": {
+   "k": 5,
+   "n": 16,
+   "pct": 31.2,
+   "ci95": [
+    14.2,
+    55.6
+   ]
+  },
+  "financial": {
+   "k": 9,
+   "n": 29,
+   "pct": 31.0,
+   "ci95": [
+    17.3,
+    49.2
+   ]
+  },
+  "formula_1": {
+   "k": 7,
+   "n": 45,
+   "pct": 15.6,
+   "ci95": [
+    7.7,
+    28.8
+   ]
+  },
+  "student_club": {
+   "k": 7,
+   "n": 25,
+   "pct": 28.0,
+   "ci95": [
+    14.3,
+    47.6
+   ]
+  },
+  "superhero": {
+   "k": 3,
+   "n": 41,
+   "pct": 7.3,
+   "ci95": [
+    2.5,
+    19.4
+   ]
+  },
+  "thrombosis_prediction": {
+   "k": 15,
+   "n": 51,
+   "pct": 29.4,
+   "ci95": [
+    18.7,
+    43.0
+   ]
+  },
+  "toxicology": {
+   "k": 9,
+   "n": 17,
+   "pct": 52.9,
+   "ci95": [
+    31.0,
+    73.8
+   ]
+  }
+ },
+ "false_alarms": {
+  "gold_all_rules": {
+   "k": 9,
+   "n": 500,
+   "pct": 1.8,
+   "ci95": [
+    0.9,
+    3.4
+   ]
+  },
+  "gold_own_rules": {
+   "k": 0,
+   "n": 500,
+   "pct": 0.0,
+   "ci95": [
+    0.0,
+    0.8
+   ]
+  },
+  "gold_fanout": {
+   "k": 9,
+   "n": 500,
+   "pct": 1.8,
+   "ci95": [
+    0.9,
+    3.4
+   ]
+  },
+  "pred_correct_all_rules": {
+   "k": 4,
+   "n": 62,
+   "pct": 6.5,
+   "ci95": [
+    2.5,
+    15.4
+   ]
+  }
+ },
+ "wasted_executions_avoided": {
+  "k": 54,
+  "n": 76,
+  "pct": 71.1,
+  "ci95": [
+   60.0,
+   80.0
+  ]
+ },
+ "precision_on_pred": {
+  "k": 139,
+  "n": 143,
+  "pct": 97.2,
+  "ci95": [
+   93.0,
+   98.9
+  ]
+ },
+ "warnings": {
+  "silent_with_warning": 7,
+  "gold_with_warning": 2
+ },
+ "rules_firing_on_silent": {
+  "FANOUT": 58,
+  "VALUE_CASE": 21,
+  "VALUE_FORMAT": 16,
+  "CHASM": 16,
+  "VALUE_MISSING": 10,
+  "LIKE_NO_MATCH": 2
+ },
+ "latency_ms": {
+  "median": 6.83,
+  "p95": 16.62,
+  "max": 256.41,
+  "n": 973
+ },
+ "gold_flagged": [
+  {
+   "question_id": 57,
+   "errors": [
+    "FANOUT",
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 91,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 132,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 201,
+   "errors": [
+    "FANOUT",
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 235,
+   "errors": [
+    "CHASM"
+   ]
+  },
+  {
+   "question_id": 276,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 430,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 477,
+   "errors": [
+    "FANOUT"
+   ]
+  },
+  {
+   "question_id": 482,
+   "errors": [
+    "FANOUT"
+   ]
+  }
+ ]
+}

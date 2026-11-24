@@ -203,3 +203,30 @@ against it, instead of writing a rival rule.
   - false alarms on the model's 49 correct answers: 3 (6.1%), **all fan-out**, the same
     q57/q91 legality-filter pattern found in M3; own rules 0/49;
   - precision 121/124 = 97.6%; crashing answers stopped 57/82 = 69.5%; p95 15.9 ms.
+
+## 2026-11-23
+
+- **qwen3.5:4b cut-off answers re-run** (`bench.generate --redo-truncated --num-predict 4096
+  --num-ctx 10240`; same seed and temperature).
+  - Only the 145 answers that hit the old 1,024-token limit were redone; the other 355 are
+    byte-for-byte unchanged (checked against `predictions.before_redo.jsonl`).
+  - Of the 145: 13 now correct, 75 silently wrong, 30 crash. 30 still hit the 4,096
+    limit; 27 of those still have no SQL, because the model reasoned for more than 4,096
+    tokens. The median redone answer that finished used 1,038 tokens, just over the old
+    limit.
+  - All 500 gold queries scored this time (no environmental timeouts).
+- **qwen3.5:4b final accuracy: 62/500 = 12.4% (9.8–15.6)**, vs qwen2.5-coder:7b 9.2%
+  (7.0–12.1).
+  - Paired on the same questions: 27 right for both, 19 only for 7b, 35 only for 3.5.
+    Exact McNemar p = 0.04.
+  - So the smaller thinking model is better, but only just significantly. Caveat: 145 of
+    its answers ran with a bigger limit than the 7b run had, though no 7b answer hit its
+    limit except 6.
+- **Plumbline on the full held-out answers** (rules unchanged since 2026-11-16):
+  - silent wrong answers caught **85/335 = 25.4% (21.0–30.3)**: own rules 29/335 = 8.7%,
+    fan-out 61/335 = 18.2%;
+  - gold false alarms 9/500 = 1.8%, own rules 0/500;
+  - false alarms on the model's 62 correct answers: 4 (6.5%), **all fan-out**, own rules 0;
+  - precision 139/143 = 97.2%; crashing answers stopped 54/76 = 71.1%;
+  - p95 16.6 ms.
+  - Detection on unseen answers (25.4%) is in line with the tuning set (22.1%).
