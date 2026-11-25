@@ -106,7 +106,9 @@ headline number. It takes about 25 minutes plus the download. It doesn't call th
 again: the exact answers the numbers came from are committed in
 [results/predictions/](results/predictions/), with the model digest and settings.
 
-Or with Docker (nothing installed but Docker; the data folder is mounted, not baked in):
+Or with Docker (nothing installed but Docker; the data folder is mounted, not baked in).
+*Not yet tested in v0.1.0:* the image follows the same steps as the tested command above,
+but hasn't been built yet.
 
 ```bash
 docker build -t plumbline .

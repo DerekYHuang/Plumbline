@@ -24,7 +24,8 @@ Anyone, including an interviewer, should be able to check the 22.1% without trus
    - runs Plumbline;
    - prints PASS or MISMATCH for each headline number.
 4. **Docker image.** Pinned Python base, runs as a non-root user, holds code only (the
-   data is mounted), and runs the reproduction by default.
+   data is mounted), and runs the reproduction by default. **Written, not yet built or
+   tested** (problem 5).
 5. **CI on GitHub.** The existing workflow lints and tests on every push. A new
    *Reproduce results* workflow runs the whole reproduction on a clean GitHub machine, on
    demand and monthly.
@@ -123,7 +124,21 @@ flowchart LR
   - **Bake the data into the image:** simple to run, but a 2 GB image, and a CC BY-SA
     layer inside an MIT image.
 
-DOCKER_NOTE
+### 5. The Docker image is written but not yet tested
+
+- **What happened:** Docker Desktop is installed, but its engine (the `docker-desktop`
+  WSL VM) never started on this PC, so the image couldn't be built here. Derek chose to
+  skip the Docker test for v0.1.0 rather than debug Docker Desktop.
+- **Status, stated plainly:** the Dockerfile follows the same steps the fresh-clone test
+  passed with (pinned Python, `pip install ".[fanout]"`, `python -m bench.reproduce`), but
+  **no image has been built or run yet.** The README marks the Docker path as untested.
+- **Alternatives:**
+  - **Fix Docker Desktop locally:** usually a pending prompt (sign-in, terms, WSL update)
+    or `wsl --update`. Then move its disk image to G: before building.
+  - **Build in CI instead:** a GitHub Actions job running `docker build` and the
+    reproduction inside the container would test the image on every release, with no
+    local Docker needed. This is the better long-term check.
+- **Verdict:** ship v0.1.0 with Docker marked untested; add the CI image build next.
 
 ## Open decisions for Derek
 
