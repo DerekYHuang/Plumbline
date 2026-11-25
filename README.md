@@ -45,7 +45,19 @@ and returns a repair hint the AI can act on. For join double-counting it relies 
 existing tool [grainguard](https://github.com/rohitchaurasia195-web/GRAINGUARD) rather than
 reinventing it.
 
-> Status: M0–M3 done (baseline, profiler, checks, scoring); M4 (packaging, v0.1) is next.
+> Status: v0.1. Baseline, profiler, checks, scoring and packaging are done (M0–M4); the
+> agent interface and repair loop (M5) are next.
+
+## Quick start
+
+```bash
+pip install "plumbline-sql[fanout] @ git+https://github.com/DerekYHuang/Plumbline@v0.1.0"
+plumbline profile shop.sqlite                     # once: learn what the data holds
+plumbline check shop.sqlite "SELECT ... WHERE status = 'Finished'"   # every query
+```
+
+`check` prints the verdict, the evidence and a fix, and exits 0 (pass), 1 (fail) or 2
+(bad input), so it works as a CI gate. From Python: `plumbline.check_sql(sql, catalog)`.
 
 ## Results
 
@@ -75,11 +87,36 @@ answer limit.
 **What it doesn't catch:** half of the missed wrong answers are *intent* errors (the AI
 misread the question), which no check on data or schema can see. Details, and every
 flagged query read by hand: [docs/m3-hand-review.md](docs/m3-hand-review.md).
-Reproduce: `python -m bench.score_checks qwen7b-r1`.
 > Every number in this README is measured, with the benchmark and model named.
 > Milestone reviews: [docs/milestones/](docs/milestones/).
 
-## Setup
+## Reproduce the numbers (one command)
+
+```bash
+git clone https://github.com/DerekYHuang/Plumbline && cd Plumbline
+pip install ".[fanout]"
+python -m bench.reproduce            # --all for both models
+```
+
+It downloads [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev) from its official
+sources (~806 MB, once), checks every file against the SHA-256 hashes in
+[bench/data_manifest.json](bench/data_manifest.json), builds the catalogs, re-executes the
+model's committed answers, re-runs Plumbline, and prints PASS or MISMATCH for each
+headline number. It takes about 25 minutes plus the download. It doesn't call the model
+again: the exact answers the numbers came from are committed in
+[results/predictions/](results/predictions/), with the model digest and settings.
+
+Or with Docker (nothing installed but Docker; the data folder is mounted, not baked in):
+
+```bash
+docker build -t plumbline .
+docker run --rm -v "$PWD/data:/app/data" plumbline
+```
+
+The same run happens on GitHub: **Actions → Reproduce results → Run workflow**
+([reproduce.yml](.github/workflows/reproduce.yml)), and monthly on its own.
+
+## Development
 
 Requires Python 3.11+.
 
@@ -89,35 +126,11 @@ python -m venv .venv
 pip install -e ".[dev]"
 pre-commit install              # lint runs before every commit, same as CI
 pytest -q
+python -m bench.fetch_data      # BIRD Mini-Dev into data/bird_mini_dev/ (gitignored)
 ```
 
-## Get the data
-
-The benchmark is [BIRD Mini-Dev](https://huggingface.co/datasets/birdsql/bird_mini_dev)
-(500 questions over 11 SQLite databases, CC BY-SA 4.0). It is not redistributed here;
-download two things into `data/bird_mini_dev/` (gitignored):
-
-1. **Questions + official prompts** (~5 MB). From the Hugging Face repo, download
-   [`baseline_inference/mini_dev_sqlite.jsonl`](https://huggingface.co/datasets/birdsql/bird_mini_dev/resolve/main/baseline_inference/mini_dev_sqlite.jsonl)
-   and save it as `data/bird_mini_dev/mini_dev_sqlite.jsonl`.
-   Use this file, not `data/mini_dev_sqlite.jsonl`: it has the same questions and gold
-   SQL plus the exact prompt BIRD used for its published baselines.
-2. **The SQLite databases** (~800 MB zip). The Hugging Face repo holds only the
-   questions; the databases come from the
-   [BIRD Mini-Dev GitHub repo](https://github.com/bird-bench/mini_dev):
-   [`minidev.zip`](https://bird-bench.oss-cn-beijing.aliyuncs.com/minidev.zip).
-   Unzip it and move the `dev_databases` folder to `data/bird_mini_dev/dev_databases/`.
-   Nesting inside it doesn't matter; the loader finds each `<db_id>.sqlite` itself.
-
-```
-data/bird_mini_dev/
-├── mini_dev_sqlite.jsonl
-└── dev_databases/
-    ├── california_schools/california_schools.sqlite
-    └── ... (11 databases)
-```
-
-Put the data somewhere else by setting `PLUMBLINE_BIRD_DIR`.
+The BIRD data (1.5 GB, CC BY-SA 4.0) isn't bundled in this MIT-licensed repo;
+`fetch_data` downloads it from the source and verifies it. Put it elsewhere with `PLUMBLINE_BIRD_DIR`.
 
 ## Check a query (M2)
 
@@ -181,4 +194,5 @@ the output.
 ## License
 
 Code: MIT (see [LICENSE](LICENSE)). The BIRD Mini-Dev benchmark used for evaluation is
-CC BY-SA 4.0 and is **not** redistributed here.
+CC BY-SA 4.0 (© its authors, [bird-bench/mini_dev](https://github.com/bird-bench/mini_dev));
+it isn't bundled here and is downloaded from its source.

@@ -1,9 +1,8 @@
 # Continuous integration: on every push and pull request, lint and test.
 #
-# The blueprint also wants a 20-question smoke benchmark here. That needs the
-# BIRD databases and a model, which we can't redistribute or run on a free CI
-# runner, so it's deferred: M1/M2 will add a tiny committed fixture database
-# that the rule tests run against instead.
+# The rule tests run against small databases built inside the tests (tests/conftest.py),
+# so CI needs neither the 1.5 GB BIRD data nor a model. The full benchmark reproduction,
+# which does need the data, is its own workflow: reproduce.yml (manual + monthly).
 
 name: CI
 

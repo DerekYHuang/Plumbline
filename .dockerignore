@@ -1,0 +1,12 @@
+# Keep the build context small and free of local state.
+.git/
+.venv/
+.compare/
+.pytest_cache/
+.ruff_cache/
+**/__pycache__/
+data/
+bench/runs/
+reproduce_out/
+compare/results/
+*.pdf

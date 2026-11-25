@@ -1,0 +1,32 @@
+{
+ "_about": "What the BIRD Mini-Dev data must look like for results to reproduce. Checked by `python -m bench.fetch_data`. Hashes taken from the copy used for every result in results/ (2026-11).",
+ "sources": {
+  "questions": {
+   "url": "https://huggingface.co/datasets/birdsql/bird_mini_dev/resolve/5b256b5a9c17478f06ed6912612e9a14d17065c8/baseline_inference/mini_dev_sqlite.jsonl",
+   "note": "Pinned to Hugging Face commit 5b256b5a so a later revision of the dataset can't change the questions."
+  },
+  "databases": {
+   "url": "https://bird-bench.oss-cn-beijing.aliyuncs.com/minidev.zip",
+   "bytes": 800943648,
+   "note": "Official BIRD Mini-Dev databases (last modified 2024-06-20). Licensed CC BY-SA 4.0; not bundled in this MIT repo, downloaded from the source."
+  }
+ },
+ "questions": {
+  "file": "mini_dev_sqlite.jsonl",
+  "sha256": "b060ee9cb69be62a052f5e40367afeb2cf08f345f15ca318fd9a0f9bf52d53ef",
+  "bytes": 4929463
+ },
+ "databases": {
+  "california_schools": {"sha256": "c0903eec662e63068fd1d14403d3d6c1d473287fc10c4356333ea58f878db983", "bytes": 11116544},
+  "card_games": {"sha256": "c98bdb57fe7474da798b407785544b9af0daaad5d61fd21e2a73309493bc1227", "bytes": 261820416},
+  "codebase_community": {"sha256": "92101be6d2a9f6adceea59d38f6d1c556087f9eea1432432a21268cb1348036d", "bytes": 481419264},
+  "debit_card_specializing": {"sha256": "b3d149ad05746dbbe5116e229e17e18f09c39db43cf117d9ef3441753608b691", "bytes": 34635776},
+  "european_football_2": {"sha256": "f72f5c9b990371417288a67b27a02e601ef904d45525c2c9f7931fb01001c536", "bytes": 597754880},
+  "financial": {"sha256": "d15d89cdb068a202b6f2b99342af44dffc1d52545b39ceaf62efdc0ba570101e", "bytes": 71294976},
+  "formula_1": {"sha256": "79770caf966707e35516fa566e24b40ae515c74ec1ec4631235245645b87b24d", "bytes": 22360064},
+  "student_club": {"sha256": "eb89bcfe97eefa386a27904ec5aa15159811a7eac894ec659a36e48fa9f76b77", "bytes": 2641920},
+  "superhero": {"sha256": "75e94a2c3236ee3bb2c01fb97a1c4b4c1c269bcefd4eab1d04be323d2d0825b1", "bytes": 237568},
+  "thrombosis_prediction": {"sha256": "87583183c3dc472fba04de702965560a9d7c0a548836613f242317e0eeb83f00", "bytes": 7327744},
+  "toxicology": {"sha256": "35ef27ae6bdfda530e125ed369666ac0abb8bc8c0bcc0ad09407f547ecb61a93", "bytes": 2678784}
+ }
+}

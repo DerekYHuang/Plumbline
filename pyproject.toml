@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plumbline-sql"
-version = "0.0.1"
+version = "0.1.0"
 description = "Pre-execution checks that catch AI-written SQL which runs fine but returns the wrong answer."
 readme = "README.md"
 license = "MIT"

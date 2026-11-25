@@ -1,0 +1,12 @@
+{
+  "model": "qwen2.5-coder:7b",
+  "model_digest": "dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+  "options": {
+    "temperature": 0.0,
+    "seed": 42,
+    "num_ctx": 8192,
+    "num_predict": 1024
+  },
+  "questions_file": "G:\\Plumbline Project\\data\\bird_mini_dev\\mini_dev_sqlite.jsonl",
+  "started_at": "2026-11-12T00:57:56+00:00"
+}

@@ -15,5 +15,5 @@ from plumbline.catalog import Catalog
 from plumbline.check import check_sql
 from plumbline.findings import CheckResult, Finding
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 __all__ = ["Catalog", "CheckResult", "Finding", "check_sql", "__version__"]

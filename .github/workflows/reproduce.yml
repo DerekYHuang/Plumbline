@@ -1,0 +1,43 @@
+# Reproduce the published numbers on a clean machine.
+#
+# Runs `python -m bench.reproduce --all` on a fresh GitHub runner: downloads BIRD Mini-Dev
+# from its official sources (cached after the first run), checks every file's SHA-256,
+# re-executes the committed model answers, re-runs Plumbline, and fails if any headline
+# number differs from what's committed in results/.
+#
+# Not run on every push: it takes ~30 minutes and downloads 800 MB. Start it from the
+# Actions tab ("Run workflow"); it also runs on the 1st of each month to catch drift
+# (a changed dependency, a moved download URL).
+
+name: Reproduce results
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 1 * *"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Cache BIRD Mini-Dev (keyed on the data manifest)
+        uses: actions/cache@v4
+        with:
+          path: data/bird_mini_dev
+          key: bird-mini-dev-${{ hashFiles('bench/data_manifest.json') }}
+      - name: Install
+        run: pip install ".[fanout]"
+      - name: Reproduce
+        run: python -m bench.reproduce --all
+      - name: Keep the outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reproduce-out
+          path: reproduce_out/

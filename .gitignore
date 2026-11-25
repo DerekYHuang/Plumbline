@@ -33,3 +33,6 @@ Thumbs.db
 # competitor comparison sandbox (isolated venv, downloaded wheels)
 .compare/
 compare/results/
+
+# one-command reproduction outputs (python -m bench.reproduce)
+reproduce_out/

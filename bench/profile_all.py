@@ -5,7 +5,7 @@
 Does three things, matching the blueprint's "how you verify it" for M1:
 
 1. Profiles every BIRD database into data/catalogs/<db_id>.json (gitignored: the catalogs
-   contain the data's values, and BIRD's data is not ours to redistribute).
+   contain the data's values, and BIRD's data is kept out of the repo; see fetch_data).
 2. Records how long each one took ("profiling all 11 databases finishes in minutes").
 3. Picks 10 columns at random (fixed seed, so it's repeatable) and recomputes their
    statistics with *different* SQL written independently of the profiler, then compares
