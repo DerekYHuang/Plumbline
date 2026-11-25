@@ -31,7 +31,18 @@ Anyone, including an interviewer, should be able to check the 22.1% without trus
 6. **README:** a 3-command quick start, the reproduce instructions, and version 0.1.0.
    **Demo:** a timed 90-second recording script in [../demo-script.md](../demo-script.md).
 
-REPRO_RESULTS
+**Acceptance test: passed.** A fresh `git clone` into a new folder, a brand-new venv,
+`pip install ".[fanout]"`, then `python -m bench.reproduce --all`:
+
+| Run | Headline numbers matching the committed results | Time |
+|---|---|---|
+| qwen2.5-coder:7b | **7 / 7** (46 correct, 308 silent wrong, 68 caught, 30 by own rules, 9 / 0 gold false alarms...) | |
+| qwen3.5:4b (held out) | **7 / 7** (62 correct, 335 silent wrong, 85 caught, 29 by own rules, 9 / 0 gold false alarms...) | |
+| Whole pipeline (data check, 500 gold queries, profiling, both runs) | | **18 min** |
+
+What this test didn't cover: the data download itself. It reused the already-downloaded
+copy (via `PLUMBLINE_BIRD_DIR`), whose hashes match the manifest. The GitHub *Reproduce
+results* workflow covers the download on a clean machine.
 
 ## Project structure after M4
 

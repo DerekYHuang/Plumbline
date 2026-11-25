@@ -230,3 +230,13 @@ against it, instead of writing a rival rule.
   - precision 139/143 = 97.2%; crashing answers stopped 54/76 = 71.1%;
   - p95 16.6 ms.
   - Detection on unseen answers (25.4%) is in line with the tuning set (22.1%).
+
+## 2026-11-25
+
+- **M4 reproduction passes from a fresh clone.** New folder, new venv, `pip install
+  ".[fanout]"`, `python -m bench.reproduce --all`: all 14 headline numbers (7 per model)
+  match the committed results exactly, in 18 min. The data download was not exercised
+  (reused a verified copy); the GitHub Reproduce workflow covers it.
+- Correction: earlier docs said BIRD's data "isn't ours to redistribute". CC BY-SA 4.0
+  does allow redistribution with attribution and the same license. It isn't bundled
+  because of size (1.5 GB) and to keep the MIT code repo single-licensed. Wording fixed.
